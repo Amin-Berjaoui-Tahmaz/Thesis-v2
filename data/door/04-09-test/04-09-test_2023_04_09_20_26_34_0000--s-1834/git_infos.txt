@@ -1,0 +1,8 @@
+directory: /home/amin/Desktop/maple/maple/..
+git hash: c13f584d4184e5796bd0adb822b8761ff4ebeee0
+git branch name: master
+
+directory: /home/amin/Desktop/robosuite/robosuite/..
+git hash: 6a23c470c55b062fc0e493609eab152ddbf97f4e
+git branch name: maple
+

@@ -1,0 +1,25 @@
+diff --git a/scripts/train.py b/scripts/train.py
+index e4b7af9..a92dff0 100644
+--- a/scripts/train.py
++++ b/scripts/train.py
+@@ -127,7 +127,7 @@ env_params = dict(
+     },
+     door={
+         'env_variant.env_type': ['Door'],
+-        'env_variant.controller_type': ['OSC_POSITION'],
++        'env_variant.controller_type': ['OSC_POSE'],
+         'env_variant.controller_config_update.position_limits': [[[-0.25, -0.25, 0.90], [0.05, 0.05, 1.20]]],
+         'env_variant.env_kwargs.skill_config.base_config.global_xyz_bounds': [
+             [[-0.25, -0.25, 0.90], [0.05, 0.05, 1.20]]],
+@@ -260,3 +260,10 @@ if __name__ == "__main__":
+ 
+         if args.first_variant:
+             exit()
++
++
++# To do:
++# Understand what the videos in data mean
++# Just change debug mode parameters: Run wipe for 1 epoch and see output (maybe even force it to execute reach for specific (x,y,z))
++# Change controller and see what parameters are needed
++# Update parameters based on 1 epoch output so that it now completely works with impedance controller and uses impedance parameters
+\ No newline at end of file

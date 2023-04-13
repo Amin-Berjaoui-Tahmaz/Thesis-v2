@@ -1,0 +1,54 @@
+diff --git a/scripts/train.py b/scripts/train.py
+index e4b7af9..014e2cb 100644
+--- a/scripts/train.py
++++ b/scripts/train.py
+@@ -121,6 +121,19 @@ base_variant = dict(
+     ),
+ )
+ 
++
++base_variant = {
++    'env_variant': {
++        'skill_config': {
++            'grasp_config': {
++                'global_xyz_bounds': [[0, 0, 0], [1, 1, 1]],
++                'aff_threshold': 0.1
++            }
++        }
++    }
++}
++
++
+ env_params = dict(
+     lift={
+         'env_variant.env_type': ['Lift'],
+@@ -201,7 +214,7 @@ def process_variant(variant):
+         variant['algorithm_kwargs']['min_num_steps_before_training'] = steps
+         variant['algorithm_kwargs']['num_trains_per_train_loop'] = 50
+         variant['replay_buffer_size'] = int(1E3)
+-        variant['dump_video_kwargs']['columns'] = 2
++        variant['dump_video_kwargs']['columns'] = 3
+ 
+     if args.no_video:
+         variant['save_video'] = False
+@@ -248,7 +261,7 @@ if __name__ == "__main__":
+             experiment,
+             exp_folder=args.env,
+             exp_prefix=args.label,
+-            variant=variant,
++            variant=base_variant,
+             snapshot_mode='gap_and_last',
+             snapshot_gap=args.snapshot_gap,
+             exp_id=exp_id,
+@@ -260,3 +273,10 @@ if __name__ == "__main__":
+ 
+         if args.first_variant:
+             exit()
++
++
++# To do:
++# Understand what the videos in data mean
++# Just change debug mode parameters: Run wipe for 1 epoch and see output (maybe even force it to execute reach for specific (x,y,z))
++# Change controller and see what parameters are needed
++# Update parameters based on 1 epoch output so that it now completely works with impedance controller and uses impedance parameters
+\ No newline at end of file

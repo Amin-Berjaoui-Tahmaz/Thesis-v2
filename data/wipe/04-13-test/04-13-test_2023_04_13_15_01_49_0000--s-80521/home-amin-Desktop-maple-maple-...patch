@@ -1,0 +1,118 @@
+diff --git a/maple/launchers/robosuite_launcher.py b/maple/launchers/robosuite_launcher.py
+index 2273ca3..c19aaeb 100644
+--- a/maple/launchers/robosuite_launcher.py
++++ b/maple/launchers/robosuite_launcher.py
+@@ -18,42 +18,57 @@ from maple.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
+ import numpy as np
+ import torch
+ 
++
++# Takes in 'variant' dictionary as input which contains parameters about the framework
++# It is extracted from different base_variant configurations (for diff hyperparams) according to training.py
+ def experiment(variant):
++    # Takes in 'mode' as input representing either exploration (training) or evaluation
+     def make_env(mode):
+         assert mode in ['expl', 'eval']
+         torch.set_num_threads(1)
+ 
++        # Extract env_variant since it contains the parameters to setup the environment 
+         env_variant = variant['env_variant']
+ 
++        # Get controller type from env_variant
+         controller_config = load_controller_config(default_controller=env_variant['controller_type'])
+         controller_config_update = env_variant.get('controller_config_update', {})
+         controller_config.update(controller_config_update)
+ 
++        # Specify Franka Emika Panda robot
+         robot_type = env_variant.get('robot_type', 'Panda')
+ 
++        # Specifies which observations from the environment to use
+         obs_keys = env_variant['robot_keys'] + env_variant['obj_keys']
+ 
++        # Make environment
+         env = suite.make(
+             env_name=env_variant['env_type'],
+             robots=robot_type,
+-            has_renderer=False,
+-            has_offscreen_renderer=True,
++            has_renderer=False, # on-screen renderer is off
++            has_offscreen_renderer=True, # off-screen renderer is on
+             use_camera_obs=False,
+             controller_configs=controller_config,
+ 
+             **env_variant['env_kwargs']
+         )
+ 
++        # Wrapper for OpenAI Gym environment
+         env = GymWrapper(env, keys=obs_keys)
+ 
+         return env
+ 
++    # Make exploration and evaluation environments
+     expl_env = make_env(mode='expl')
+     eval_env = make_env(mode='eval')
+ 
++
++    # Identify dimension of observation and action spaces
+     obs_dim = expl_env.observation_space.low.size
+     action_dim = eval_env.action_space.low.size
+ 
++
++    # Concatenate inputs along dimension and then pass through MLP
+     M = variant['layer_size']
+     qf1 = ConcatMlp(
+         input_size=obs_dim + action_dim,
+@@ -193,6 +208,11 @@ def experiment(variant):
+     algorithm.to(ptu.device)
+     algorithm.train(start_epoch=variant.get('ckpt_epoch', 0))
+ 
++
++
++
++
++
+ def get_ckpt_update_func(variant):
+     import os.path as osp
+     import torch
+diff --git a/scripts/train.py b/scripts/train.py
+index e4b7af9..fd14516 100644
+--- a/scripts/train.py
++++ b/scripts/train.py
+@@ -121,6 +121,7 @@ base_variant = dict(
+     ),
+ )
+ 
++
+ env_params = dict(
+     lift={
+         'env_variant.env_type': ['Lift'],
+@@ -201,7 +202,7 @@ def process_variant(variant):
+         variant['algorithm_kwargs']['min_num_steps_before_training'] = steps
+         variant['algorithm_kwargs']['num_trains_per_train_loop'] = 50
+         variant['replay_buffer_size'] = int(1E3)
+-        variant['dump_video_kwargs']['columns'] = 2
++        variant['dump_video_kwargs']['columns'] = 3
+ 
+     if args.no_video:
+         variant['save_video'] = False
+@@ -260,3 +261,20 @@ if __name__ == "__main__":
+ 
+         if args.first_variant:
+             exit()
++
++
++# To do:
++# Understand what the videos in data mean
++# Just change debug mode parameters: Run wipe for 1 epoch and see output (maybe even force it to execute reach for specific (x,y,z))
++# Change controller and see what parameters are needed
++# Update parameters based on 1 epoch output so that it now completely works with impedance controller and uses impedance parameters
++
++
++
++
++
++
++
++
++
++# In data folder, _expl (in vis_expl: visualize exploring) means exploration (during training) while _eval means evaluation (during evaluation)

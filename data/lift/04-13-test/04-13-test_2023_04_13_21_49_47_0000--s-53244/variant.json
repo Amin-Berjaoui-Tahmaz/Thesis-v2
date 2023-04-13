@@ -1,0 +1,176 @@
+{
+  "algorithm_kwargs": {
+    "batch_size": 64,
+    "eval_epoch_freq": 10,
+    "max_path_length": 50,
+    "min_num_steps_before_training": 50,
+    "num_epochs": 3,
+    "num_eval_steps_per_epoch": 50,
+    "num_expl_steps_per_train_loop": 50,
+    "num_trains_per_train_loop": 50
+  },
+  "dump_video_kwargs": {
+    "columns": 3,
+    "pad_color": 0,
+    "pad_length": 5,
+    "rows": 1
+  },
+  "env_variant": {
+    "controller_config_update": {
+      "position_limits": [
+        [
+          -0.3,
+          -0.3,
+          0.75
+        ],
+        [
+          0.15,
+          0.3,
+          1.15
+        ]
+      ]
+    },
+    "controller_type": "OSC_POSITION_YAW",
+    "env_kwargs": {
+      "camera_heights": 512,
+      "camera_widths": 512,
+      "control_freq": 10,
+      "hard_reset": false,
+      "ignore_done": true,
+      "reward_scale": 5.0,
+      "reward_shaping": true,
+      "skill_config": {
+        "aff_penalty_fac": 15.0,
+        "atomic_config": {
+          "use_ori_params": true
+        },
+        "base_config": {
+          "aff_tanh_scaling": 10.0,
+          "aff_threshold": 0.06,
+          "aff_type": "dense",
+          "binary_gripper": true,
+          "global_xyz_bounds": [
+            [
+              -0.3,
+              -0.3,
+              0.8
+            ],
+            [
+              0.15,
+              0.3,
+              0.95
+            ]
+          ],
+          "lift_height": 0.95
+        },
+        "grasp_config": {
+          "aff_threshold": 0.03,
+          "global_xyz_bounds": [
+            [
+              -0.3,
+              -0.3,
+              0.8
+            ],
+            [
+              0.15,
+              0.3,
+              0.85
+            ]
+          ],
+          "local_xyz_scale": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max_ac_calls": 20,
+          "num_grasp_steps": 3,
+          "num_reach_steps": 2,
+          "use_ori_params": true
+        },
+        "push_config": {
+          "aff_threshold": [
+            0.12,
+            0.12,
+            0.04
+          ],
+          "delta_xyz_scale": [
+            0.25,
+            0.25,
+            0.05
+          ],
+          "global_xyz_bounds": [
+            [
+              -0.3,
+              -0.3,
+              0.8
+            ],
+            [
+              0.15,
+              0.3,
+              0.85
+            ]
+          ],
+          "max_ac_calls": 20,
+          "use_ori_params": true
+        },
+        "reach_config": {
+          "local_xyz_scale": [
+            0.0,
+            0.0,
+            0.06
+          ],
+          "max_ac_calls": 15,
+          "use_gripper_params": false,
+          "use_ori_params": false
+        },
+        "skills": [
+          "atomic"
+        ]
+      },
+      "table_offset": [
+        -0.075,
+        0,
+        0.8
+      ]
+    },
+    "env_type": "Lift",
+    "obj_keys": [
+      "object-state"
+    ],
+    "robot_keys": [
+      "robot0_eef_pos",
+      "robot0_eef_quat",
+      "robot0_gripper_qpos",
+      "robot0_gripper_qvel"
+    ]
+  },
+  "exp_id": "0",
+  "exp_label": "test",
+  "exp_prefix": "04-13-test",
+  "instance_type": "None",
+  "layer_size": 256,
+  "ll_sac_variant": {
+    "high_init_ent": true
+  },
+  "pamdp_variant": {
+    "high_init_ent": true,
+    "one_hot_factor": 0.5,
+    "one_hot_s": true
+  },
+  "replay_buffer_size": 1000,
+  "rollout_fn_kwargs": {
+    "terminals_all_false": true
+  },
+  "save_video": true,
+  "save_video_period": 100,
+  "seed": "53244",
+  "trainer_kwargs": {
+    "discount": 0.99,
+    "policy_lr": 3e-05,
+    "qf_lr": 3e-05,
+    "reward_scale": 1,
+    "soft_target_tau": 0.001,
+    "target_update_period": 1,
+    "use_automatic_entropy_tuning": true
+  }
+}

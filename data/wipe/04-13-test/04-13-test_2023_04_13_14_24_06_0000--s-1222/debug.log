@@ -1,0 +1,884 @@
+2023-04-13 14:24:20.509534 CEST | [04-13-test_2023_04_13_14_24_06_0000--s-1222] Epoch 0 finished
+--------------------------------------------  --------------
+replay_buffer/size                               6
+trainer/num train calls                         50
+trainer/QF1 Loss                                34.6727
+trainer/QF2 Loss                                34.6694
+trainer/Policy Loss                             -5.13988
+trainer/Q1 Predictions Mean                     -8.25828e-05
+trainer/Q1 Predictions Std                       0.000436826
+trainer/Q2 Predictions Mean                      0.000400642
+trainer/Q2 Predictions Std                       0.00031788
+trainer/Q Targets Mean                          -0.399635
+trainer/Q Targets Std                            5.87468
+trainer/Log Pis S Mean                          -1.0986
+trainer/Log Pis S Std                            6.65748e-05
+trainer/Log Pis P Mean                          -3.93148
+trainer/Log Pis P Std                            0.5424
+trainer/policy/softmax_task/logit Mean          -4.42446e-06
+trainer/policy/softmax_task/logit Std            8.17806e-05
+trainer/policy/softmax_task/logit Max            0.000142844
+trainer/policy/softmax_task/logit Min           -0.000155547
+trainer/policy/softmax_task/logit_std Mean       6.91309e-05
+trainer/policy/softmax_task/logit_std Std        3.65906e-05
+trainer/policy/softmax_task/logit_range Mean     0.000159629
+trainer/policy/softmax_task/logit_range Std      7.93398e-05
+trainer/policy/softmax_task/logit_0 Mean         0
+trainer/policy/softmax_task/logit_0 Std          0
+trainer/policy/softmax_task/logit_1 Mean         0.000119166
+trainer/policy/softmax_task/logit_1 Std          8.55054e-05
+trainer/policy/softmax_task/logit_2 Mean         0.000159629
+trainer/policy/softmax_task/logit_2 Std          7.93398e-05
+trainer/policy/normal_param/mean Mean            1.19078e-05
+trainer/policy/normal_param/mean Std             0.000163578
+trainer/policy/normal_param/std Mean             1.00006
+trainer/policy/normal_param/std Std              0.000130511
+trainer/policy/normal_param/std Max              1.0004
+trainer/policy/normal_param/std Min              0.999712
+trainer/policy/normal_param/log_std Mean         5.80211e-05
+trainer/policy/normal_param/log_std Std          0.000130502
+trainer/Alpha S                                  1
+trainer/Alpha S Loss                             0
+trainer/Alpha P                                  1
+trainer/Alpha P Loss                             0
+expl/num steps total                            68
+expl/num paths total                             2
+expl/num actions total                          68
+expl/path length Mean                           32
+expl/path length Std                             0
+expl/Rewards Mean                               -6.18999
+expl/Rewards Std                                 4.65857
+expl/Returns Mean                              -18.57
+expl/Returns Std                                 0
+expl/Actions Mean                               -0.00819089
+expl/Actions Std                                 0.619345
+expl/Num Paths                                   1
+expl/Average Returns                           -18.57
+expl/Task Returns Sum                            4.60532
+expl/Task Returns Avg                            0.143916
+expl/Num Rollout Success                         0
+expl/env_infos/final/success Mean                0
+expl/env_infos/final/success Std                 0
+expl/env_infos/initial/success Mean              0
+expl/env_infos/initial/success Std               0
+expl/env_infos/success Mean                      0
+expl/env_infos/success Std                       0
+expl/env_infos/final/percent_wiped Mean          0
+expl/env_infos/final/percent_wiped Std           0
+expl/env_infos/initial/percent_wiped Mean        0
+expl/env_infos/initial/percent_wiped Std         0
+expl/env_infos/percent_wiped Mean                0
+expl/env_infos/percent_wiped Std                 0
+expl/env_infos/final/f_excess_total Mean         0
+expl/env_infos/final/f_excess_total Std          0
+expl/env_infos/initial/f_excess_total Mean       0
+expl/env_infos/initial/f_excess_total Std        0
+expl/env_infos/f_excess_total Mean               0
+expl/env_infos/f_excess_total Std                0
+expl/env_infos/final/f_excess_max Mean           0
+expl/env_infos/final/f_excess_max Std            0
+expl/env_infos/initial/f_excess_max Mean         0
+expl/env_infos/initial/f_excess_max Std          0
+expl/env_infos/f_excess_max Mean                 0
+expl/env_infos/f_excess_max Std                  0
+expl/env_infos/final/f_excess_mean Mean          0
+expl/env_infos/final/f_excess_mean Std           0
+expl/env_infos/initial/f_excess_mean Mean        0
+expl/env_infos/initial/f_excess_mean Std         0
+expl/env_infos/f_excess_mean Mean                0
+expl/env_infos/f_excess_mean Std                 0
+expl/env_infos/final/reward_actions Mean         0.324791
+expl/env_infos/final/reward_actions Std          0
+expl/env_infos/initial/reward_actions Mean       3.8849
+expl/env_infos/initial/reward_actions Std        0
+expl/env_infos/reward_actions Mean               1.53511
+expl/env_infos/reward_actions Std                1.66181
+expl/env_infos/final/reward_skills Mean          0.040476
+expl/env_infos/final/reward_skills Std           0
+expl/env_infos/initial/reward_skills Mean        0.429546
+expl/env_infos/initial/reward_skills Std         0
+expl/env_infos/reward_skills Mean                0.288549
+expl/env_infos/reward_skills Std                 0.17596
+expl/env_infos/final/num_ac_calls Mean          11
+expl/env_infos/final/num_ac_calls Std            0
+expl/env_infos/initial/num_ac_calls Mean        20
+expl/env_infos/initial/num_ac_calls Std          0
+expl/env_infos/num_ac_calls Mean                10.6667
+expl/env_infos/num_ac_calls Std                  7.7603
+expl/env_infos/final/skill_complete Mean         1
+expl/env_infos/final/skill_complete Std          0
+expl/env_infos/initial/skill_complete Mean       0
+expl/env_infos/initial/skill_complete Std        0
+expl/env_infos/skill_complete Mean               0.666667
+expl/env_infos/skill_complete Std                0.471405
+expl/env_infos/final/aff_reward Mean             0.375772
+expl/env_infos/final/aff_reward Std              0
+expl/env_infos/initial/aff_reward Mean           0.328519
+expl/env_infos/initial/aff_reward Std            0
+expl/env_infos/aff_reward Mean                   0.568097
+expl/env_infos/aff_reward Std                    0.30601
+expl/env_infos/final/aff_success Mean            0
+expl/env_infos/final/aff_success Std             0
+expl/env_infos/initial/aff_success Mean          0
+expl/env_infos/initial/aff_success Std           0
+expl/env_infos/aff_success Mean                  0.333333
+expl/env_infos/aff_success Std                   0.471405
+eval/num steps total                            50
+eval/num paths total                             1
+eval/num actions total                          50
+eval/path length Mean                           50
+eval/path length Std                             0
+eval/Rewards Mean                               -6.02817
+eval/Rewards Std                                 1.07651
+eval/Returns Mean                             -204.958
+eval/Returns Std                                 0
+eval/Actions Mean                                0.111114
+eval/Actions Std                                 0.314269
+eval/Num Paths                                   1
+eval/Average Returns                          -204.958
+eval/Task Returns Sum                            5.58922
+eval/Task Returns Avg                            0.111784
+eval/Num Rollout Success                         0
+eval/env_infos/final/success Mean                0
+eval/env_infos/final/success Std                 0
+eval/env_infos/initial/success Mean              0
+eval/env_infos/initial/success Std               0
+eval/env_infos/success Mean                      0
+eval/env_infos/success Std                       0
+eval/env_infos/final/percent_wiped Mean          0
+eval/env_infos/final/percent_wiped Std           0
+eval/env_infos/initial/percent_wiped Mean        0
+eval/env_infos/initial/percent_wiped Std         0
+eval/env_infos/percent_wiped Mean                0
+eval/env_infos/percent_wiped Std                 0
+eval/env_infos/final/f_excess_total Mean         0
+eval/env_infos/final/f_excess_total Std          0
+eval/env_infos/initial/f_excess_total Mean       0
+eval/env_infos/initial/f_excess_total Std        0
+eval/env_infos/f_excess_total Mean               0
+eval/env_infos/f_excess_total Std                0
+eval/env_infos/final/f_excess_max Mean           0
+eval/env_infos/final/f_excess_max Std            0
+eval/env_infos/initial/f_excess_max Mean         0
+eval/env_infos/initial/f_excess_max Std          0
+eval/env_infos/f_excess_max Mean                 0
+eval/env_infos/f_excess_max Std                  0
+eval/env_infos/final/f_excess_mean Mean          0
+eval/env_infos/final/f_excess_mean Std           0
+eval/env_infos/initial/f_excess_mean Mean        0
+eval/env_infos/initial/f_excess_mean Std         0
+eval/env_infos/f_excess_mean Mean                0
+eval/env_infos/f_excess_mean Std                 0
+eval/env_infos/final/reward_actions Mean         0.114322
+eval/env_infos/final/reward_actions Std          0
+eval/env_infos/initial/reward_actions Mean       1.42439
+eval/env_infos/initial/reward_actions Std        0
+eval/env_infos/reward_actions Mean               0.164389
+eval/env_infos/reward_actions Std                0.229236
+eval/env_infos/final/reward_skills Mean          0.114322
+eval/env_infos/final/reward_skills Std           0
+eval/env_infos/initial/reward_skills Mean        0.155899
+eval/env_infos/initial/reward_skills Std         0
+eval/env_infos/reward_skills Mean                0.115513
+eval/env_infos/reward_skills Std                 0.00703722
+eval/env_infos/final/num_ac_calls Mean           1
+eval/env_infos/final/num_ac_calls Std            0
+eval/env_infos/initial/num_ac_calls Mean        14
+eval/env_infos/initial/num_ac_calls Std          0
+eval/env_infos/num_ac_calls Mean                 1.47059
+eval/env_infos/num_ac_calls Std                  2.23916
+eval/env_infos/final/skill_complete Mean         1
+eval/env_infos/final/skill_complete Std          0
+eval/env_infos/initial/skill_complete Mean       1
+eval/env_infos/initial/skill_complete Std        0
+eval/env_infos/skill_complete Mean               1
+eval/env_infos/skill_complete Std                0
+eval/env_infos/final/aff_reward Mean             0.57801
+eval/env_infos/final/aff_reward Std              0
+eval/env_infos/initial/aff_reward Mean           1
+eval/env_infos/initial/aff_reward Std            0
+eval/env_infos/aff_reward Mean                   0.590421
+eval/env_infos/aff_reward Std                    0.0712985
+eval/env_infos/final/aff_success Mean            0
+eval/env_infos/final/aff_success Std             0
+eval/env_infos/initial/aff_success Mean          1
+eval/env_infos/initial/aff_success Std           0
+eval/env_infos/aff_success Mean                  0.0294118
+eval/env_infos/aff_success Std                   0.168958
+process/RAM Usage (Mb)                        3180
+process/Num Threads                             29
+time/data storing (s)                            3.3216e-05
+time/evaluation sampling (s)                     2.85514
+time/exploration sampling (s)                    3.31228
+time/logging (s)                                 0.0149095
+time/sac training (s)                            0.758446
+time/saving (s)                                  0.0137936
+time/training (s)                                8.0064e-05
+time/epoch (s)                                   6.95468
+time/total (s)                                  10.3739
+Dummy                                            0
+Epoch                                            0
+--------------------------------------------  --------------
+2023-04-13 14:25:27.068355 CEST | [04-13-test_2023_04_13_14_24_06_0000--s-1222] Epoch 1 finished
+--------------------------------------------  --------------
+replay_buffer/size                              10
+trainer/num train calls                        100
+trainer/QF1 Loss                                28.8302
+trainer/QF2 Loss                                28.8345
+trainer/Policy Loss                             -5.15948
+trainer/Q1 Predictions Mean                     -0.000293993
+trainer/Q1 Predictions Std                       0.00407336
+trainer/Q2 Predictions Mean                     -0.000127822
+trainer/Q2 Predictions Std                       0.00352571
+trainer/Q Targets Mean                           0.276775
+trainer/Q Targets Std                            5.3654
+trainer/Log Pis S Mean                          -1.09863
+trainer/Log Pis S Std                            0.000290094
+trainer/Log Pis P Mean                          -4.04248
+trainer/Log Pis P Std                            0.494285
+trainer/policy/softmax_task/logit Mean           4.02278e-05
+trainer/policy/softmax_task/logit Std            0.000305528
+trainer/policy/softmax_task/logit Max            0.000654374
+trainer/policy/softmax_task/logit Min           -0.000286606
+trainer/policy/softmax_task/logit_std Mean       0.000287754
+trainer/policy/softmax_task/logit_std Std        9.67045e-05
+trainer/policy/softmax_task/logit_range Mean     0.000636152
+trainer/policy/softmax_task/logit_range Std      0.00019688
+trainer/policy/softmax_task/logit_0 Mean         0
+trainer/policy/softmax_task/logit_0 Std          0
+trainer/policy/softmax_task/logit_1 Mean         6.06014e-05
+trainer/policy/softmax_task/logit_1 Std          4.47829e-05
+trainer/policy/softmax_task/logit_2 Mean         0.000636152
+trainer/policy/softmax_task/logit_2 Std          0.00019688
+trainer/policy/normal_param/mean Mean            0.000144075
+trainer/policy/normal_param/mean Std             0.000967979
+trainer/policy/normal_param/std Mean             0.994098
+trainer/policy/normal_param/std Std              0.000905973
+trainer/policy/normal_param/std Max              0.995741
+trainer/policy/normal_param/std Min              0.992308
+trainer/policy/normal_param/log_std Mean        -0.00591959
+trainer/policy/normal_param/log_std Std          0.000911459
+trainer/Alpha S                                  0.998501
+trainer/Alpha S Loss                            -4.94375e-05
+trainer/Alpha P                                  0.998502
+trainer/Alpha P Loss                            -0.00610316
+expl/num steps total                           118
+expl/num paths total                             3
+expl/num actions total                         118
+expl/path length Mean                           50
+expl/path length Std                             0
+expl/Rewards Mean                               -4.75352
+expl/Rewards Std                                 5.38633
+expl/Returns Mean                              -19.0141
+expl/Returns Std                                 0
+expl/Actions Mean                                0.194485
+expl/Actions Std                                 0.608786
+expl/Num Paths                                   1
+expl/Average Returns                           -19.0141
+expl/Task Returns Sum                          -57.8374
+expl/Task Returns Avg                           -1.15675
+expl/Num Rollout Success                         0
+expl/env_infos/final/success Mean                0
+expl/env_infos/final/success Std                 0
+expl/env_infos/initial/success Mean              0
+expl/env_infos/initial/success Std               0
+expl/env_infos/success Mean                      0
+expl/env_infos/success Std                       0
+expl/env_infos/final/percent_wiped Mean          0
+expl/env_infos/final/percent_wiped Std           0
+expl/env_infos/initial/percent_wiped Mean        0
+expl/env_infos/initial/percent_wiped Std         0
+expl/env_infos/percent_wiped Mean                0
+expl/env_infos/percent_wiped Std                 0
+expl/env_infos/final/f_excess_total Mean         9
+expl/env_infos/final/f_excess_total Std          0
+expl/env_infos/initial/f_excess_total Mean       0
+expl/env_infos/initial/f_excess_total Std        0
+expl/env_infos/f_excess_total Mean               6
+expl/env_infos/f_excess_total Std                3.53553
+expl/env_infos/final/f_excess_max Mean           1
+expl/env_infos/final/f_excess_max Std            0
+expl/env_infos/initial/f_excess_max Mean         0
+expl/env_infos/initial/f_excess_max Std          0
+expl/env_infos/f_excess_max Mean                 0.75
+expl/env_infos/f_excess_max Std                  0.433013
+expl/env_infos/final/f_excess_mean Mean          0.05
+expl/env_infos/final/f_excess_mean Std           0
+expl/env_infos/initial/f_excess_mean Mean        0
+expl/env_infos/initial/f_excess_mean Std         0
+expl/env_infos/f_excess_mean Mean                0.147024
+expl/env_infos/f_excess_mean Std                 0.186357
+expl/env_infos/final/reward_actions Mean        -9.65828
+expl/env_infos/final/reward_actions Std          0
+expl/env_infos/initial/reward_actions Mean       0.0265265
+expl/env_infos/initial/reward_actions Std        0
+expl/env_infos/reward_actions Mean             -14.4593
+expl/env_infos/reward_actions Std               10.7755
+expl/env_infos/final/reward_skills Mean         -2.11361
+expl/env_infos/final/reward_skills Std           0
+expl/env_infos/initial/reward_skills Mean        0.0265265
+expl/env_infos/initial/reward_skills Std         0
+expl/env_infos/reward_skills Mean               -1.6722
+expl/env_infos/reward_skills Std                 0.995566
+expl/env_infos/final/num_ac_calls Mean          20
+expl/env_infos/final/num_ac_calls Std            0
+expl/env_infos/initial/num_ac_calls Mean         1
+expl/env_infos/initial/num_ac_calls Std          0
+expl/env_infos/num_ac_calls Mean                12.5
+expl/env_infos/num_ac_calls Std                  7.01783
+expl/env_infos/final/skill_complete Mean         0
+expl/env_infos/final/skill_complete Std          0
+expl/env_infos/initial/skill_complete Mean       1
+expl/env_infos/initial/skill_complete Std        0
+expl/env_infos/skill_complete Mean               0.5
+expl/env_infos/skill_complete Std                0.5
+expl/env_infos/final/aff_reward Mean             1
+expl/env_infos/final/aff_reward Std              0
+expl/env_infos/initial/aff_reward Mean           1
+expl/env_infos/initial/aff_reward Std            0
+expl/env_infos/aff_reward Mean                   0.794578
+expl/env_infos/aff_reward Std                    0.335769
+expl/env_infos/final/aff_success Mean            1
+expl/env_infos/final/aff_success Std             0
+expl/env_infos/initial/aff_success Mean          1
+expl/env_infos/initial/aff_success Std           0
+expl/env_infos/aff_success Mean                  0.5
+expl/env_infos/aff_success Std                   0.5
+eval/num steps total                            50
+eval/num paths total                             1
+eval/num actions total                          50
+eval/path length Mean                           50
+eval/path length Std                             0
+eval/Rewards Mean                               -6.02817
+eval/Rewards Std                                 1.07651
+eval/Returns Mean                             -204.958
+eval/Returns Std                                 0
+eval/Actions Mean                                0.111114
+eval/Actions Std                                 0.314269
+eval/Num Paths                                   1
+eval/Average Returns                          -204.958
+eval/Task Returns Sum                            5.58922
+eval/Task Returns Avg                            0.111784
+eval/Num Rollout Success                         0
+eval/env_infos/final/success Mean                0
+eval/env_infos/final/success Std                 0
+eval/env_infos/initial/success Mean              0
+eval/env_infos/initial/success Std               0
+eval/env_infos/success Mean                      0
+eval/env_infos/success Std                       0
+eval/env_infos/final/percent_wiped Mean          0
+eval/env_infos/final/percent_wiped Std           0
+eval/env_infos/initial/percent_wiped Mean        0
+eval/env_infos/initial/percent_wiped Std         0
+eval/env_infos/percent_wiped Mean                0
+eval/env_infos/percent_wiped Std                 0
+eval/env_infos/final/f_excess_total Mean         0
+eval/env_infos/final/f_excess_total Std          0
+eval/env_infos/initial/f_excess_total Mean       0
+eval/env_infos/initial/f_excess_total Std        0
+eval/env_infos/f_excess_total Mean               0
+eval/env_infos/f_excess_total Std                0
+eval/env_infos/final/f_excess_max Mean           0
+eval/env_infos/final/f_excess_max Std            0
+eval/env_infos/initial/f_excess_max Mean         0
+eval/env_infos/initial/f_excess_max Std          0
+eval/env_infos/f_excess_max Mean                 0
+eval/env_infos/f_excess_max Std                  0
+eval/env_infos/final/f_excess_mean Mean          0
+eval/env_infos/final/f_excess_mean Std           0
+eval/env_infos/initial/f_excess_mean Mean        0
+eval/env_infos/initial/f_excess_mean Std         0
+eval/env_infos/f_excess_mean Mean                0
+eval/env_infos/f_excess_mean Std                 0
+eval/env_infos/final/reward_actions Mean         0.114322
+eval/env_infos/final/reward_actions Std          0
+eval/env_infos/initial/reward_actions Mean       1.42439
+eval/env_infos/initial/reward_actions Std        0
+eval/env_infos/reward_actions Mean               0.164389
+eval/env_infos/reward_actions Std                0.229236
+eval/env_infos/final/reward_skills Mean          0.114322
+eval/env_infos/final/reward_skills Std           0
+eval/env_infos/initial/reward_skills Mean        0.155899
+eval/env_infos/initial/reward_skills Std         0
+eval/env_infos/reward_skills Mean                0.115513
+eval/env_infos/reward_skills Std                 0.00703722
+eval/env_infos/final/num_ac_calls Mean           1
+eval/env_infos/final/num_ac_calls Std            0
+eval/env_infos/initial/num_ac_calls Mean        14
+eval/env_infos/initial/num_ac_calls Std          0
+eval/env_infos/num_ac_calls Mean                 1.47059
+eval/env_infos/num_ac_calls Std                  2.23916
+eval/env_infos/final/skill_complete Mean         1
+eval/env_infos/final/skill_complete Std          0
+eval/env_infos/initial/skill_complete Mean       1
+eval/env_infos/initial/skill_complete Std        0
+eval/env_infos/skill_complete Mean               1
+eval/env_infos/skill_complete Std                0
+eval/env_infos/final/aff_reward Mean             0.57801
+eval/env_infos/final/aff_reward Std              0
+eval/env_infos/initial/aff_reward Mean           1
+eval/env_infos/initial/aff_reward Std            0
+eval/env_infos/aff_reward Mean                   0.590421
+eval/env_infos/aff_reward Std                    0.0712985
+eval/env_infos/final/aff_success Mean            0
+eval/env_infos/final/aff_success Std             0
+eval/env_infos/initial/aff_success Mean          1
+eval/env_infos/initial/aff_success Std           0
+eval/env_infos/aff_success Mean                  0.0294118
+eval/env_infos/aff_success Std                   0.168958
+process/RAM Usage (Mb)                        3301
+process/Num Threads                             36
+time/data storing (s)                            6.3009e-05
+time/evaluation sampling (s)                     5.4616e-05
+time/exploration sampling (s)                    3.03247
+time/logging (s)                                 0.00287618
+time/sac training (s)                            0.733285
+time/saving (s)                                  0.00701574
+time/training (s)                                5.88e-05
+time/epoch (s)                                   3.77582
+time/total (s)                                  76.9194
+Dummy                                            0
+Epoch                                            1
+--------------------------------------------  --------------
+2023-04-13 14:25:30.367429 CEST | [04-13-test_2023_04_13_14_24_06_0000--s-1222] Epoch 2 finished
+--------------------------------------------  --------------
+replay_buffer/size                              16
+trainer/num train calls                        150
+trainer/QF1 Loss                                30.2691
+trainer/QF2 Loss                                30.2561
+trainer/Policy Loss                             -5.16334
+trainer/Q1 Predictions Mean                     -0.000692132
+trainer/Q1 Predictions Std                       0.00889747
+trainer/Q2 Predictions Mean                     -0.000105019
+trainer/Q2 Predictions Std                       0.00883164
+trainer/Q Targets Mean                           2.55389
+trainer/Q Targets Std                            4.87705
+trainer/Log Pis S Mean                          -1.09871
+trainer/Log Pis S Std                            0.000844521
+trainer/Log Pis P Mean                          -3.99714
+trainer/Log Pis P Std                            0.519714
+trainer/policy/softmax_task/logit Mean           2.41899e-05
+trainer/policy/softmax_task/logit Std            0.000907554
+trainer/policy/softmax_task/logit Max            0.00145719
+trainer/policy/softmax_task/logit Min           -0.000806777
+trainer/policy/softmax_task/logit_std Mean       0.000904643
+trainer/policy/softmax_task/logit_std Std        6.40539e-05
+trainer/policy/softmax_task/logit_range Mean     0.00203034
+trainer/policy/softmax_task/logit_range Std      0.000123101
+trainer/policy/softmax_task/logit_0 Mean         0
+trainer/policy/softmax_task/logit_0 Std          0
+trainer/policy/softmax_task/logit_1 Mean         0.000249934
+trainer/policy/softmax_task/logit_1 Std          6.97487e-05
+trainer/policy/softmax_task/logit_2 Mean         0.00203034
+trainer/policy/softmax_task/logit_2 Std          0.000123101
+trainer/policy/normal_param/mean Mean            0.000374184
+trainer/policy/normal_param/mean Std             0.00288137
+trainer/policy/normal_param/std Mean             0.979064
+trainer/policy/normal_param/std Std              0.00234573
+trainer/policy/normal_param/std Max              0.983606
+trainer/policy/normal_param/std Min              0.97304
+trainer/policy/normal_param/log_std Mean        -0.0211615
+trainer/policy/normal_param/log_std Std          0.00239696
+trainer/Alpha S                                  0.998116
+trainer/Alpha S Loss                            -6.21546e-05
+trainer/Alpha P                                  0.997619
+trainer/Alpha P Loss                            -0.00972292
+expl/num steps total                           168
+expl/num paths total                             4
+expl/num actions total                         168
+expl/path length Mean                           50
+expl/path length Std                             0
+expl/Rewards Mean                                0.218558
+expl/Rewards Std                                 0.419508
+expl/Returns Mean                                1.31135
+expl/Returns Std                                 0
+expl/Actions Mean                                0.177763
+expl/Actions Std                                 0.610073
+expl/Num Paths                                   1
+expl/Average Returns                             1.31135
+expl/Task Returns Sum                           12.6727
+expl/Task Returns Avg                            0.253454
+expl/Num Rollout Success                         0
+expl/env_infos/final/success Mean                0
+expl/env_infos/final/success Std                 0
+expl/env_infos/initial/success Mean              0
+expl/env_infos/initial/success Std               0
+expl/env_infos/success Mean                      0
+expl/env_infos/success Std                       0
+expl/env_infos/final/percent_wiped Mean          0.12
+expl/env_infos/final/percent_wiped Std           0
+expl/env_infos/initial/percent_wiped Mean        0
+expl/env_infos/initial/percent_wiped Std         0
+expl/env_infos/percent_wiped Mean                0.1
+expl/env_infos/percent_wiped Std                 0.0447214
+expl/env_infos/final/f_excess_total Mean         0
+expl/env_infos/final/f_excess_total Std          0
+expl/env_infos/initial/f_excess_total Mean       0
+expl/env_infos/initial/f_excess_total Std        0
+expl/env_infos/f_excess_total Mean               0
+expl/env_infos/f_excess_total Std                0
+expl/env_infos/final/f_excess_max Mean           0
+expl/env_infos/final/f_excess_max Std            0
+expl/env_infos/initial/f_excess_max Mean         0
+expl/env_infos/initial/f_excess_max Std          0
+expl/env_infos/f_excess_max Mean                 0
+expl/env_infos/f_excess_max Std                  0
+expl/env_infos/final/f_excess_mean Mean          0
+expl/env_infos/final/f_excess_mean Std           0
+expl/env_infos/initial/f_excess_mean Mean        0
+expl/env_infos/initial/f_excess_mean Std         0
+expl/env_infos/f_excess_mean Mean                0
+expl/env_infos/f_excess_mean Std                 0
+expl/env_infos/final/reward_actions Mean         5.24493
+expl/env_infos/final/reward_actions Std          0
+expl/env_infos/initial/reward_actions Mean       1.86607
+expl/env_infos/initial/reward_actions Std        0
+expl/env_infos/reward_actions Mean               2.11212
+expl/env_infos/reward_actions Std                1.91918
+expl/env_infos/final/reward_skills Mean          0.543044
+expl/env_infos/final/reward_skills Std           0
+expl/env_infos/initial/reward_skills Mean        0.117117
+expl/env_infos/initial/reward_skills Std         0
+expl/env_infos/reward_skills Mean                0.424934
+expl/env_infos/reward_skills Std                 0.140099
+expl/env_infos/final/num_ac_calls Mean          11
+expl/env_infos/final/num_ac_calls Std            0
+expl/env_infos/initial/num_ac_calls Mean        20
+expl/env_infos/initial/num_ac_calls Std          0
+expl/env_infos/num_ac_calls Mean                 8.33333
+expl/env_infos/num_ac_calls Std                  7.78175
+expl/env_infos/final/skill_complete Mean         1
+expl/env_infos/final/skill_complete Std          0
+expl/env_infos/initial/skill_complete Mean       0
+expl/env_infos/initial/skill_complete Std        0
+expl/env_infos/skill_complete Mean               0.833333
+expl/env_infos/skill_complete Std                0.372678
+expl/env_infos/final/aff_reward Mean             0.919456
+expl/env_infos/final/aff_reward Std              0
+expl/env_infos/initial/aff_reward Mean           0.997994
+expl/env_infos/initial/aff_reward Std            0
+expl/env_infos/aff_reward Mean                   0.986242
+expl/env_infos/aff_reward Std                    0.0298765
+expl/env_infos/final/aff_success Mean            0
+expl/env_infos/final/aff_success Std             0
+expl/env_infos/initial/aff_success Mean          0
+expl/env_infos/initial/aff_success Std           0
+expl/env_infos/aff_success Mean                  0.666667
+expl/env_infos/aff_success Std                   0.471405
+eval/num steps total                            50
+eval/num paths total                             1
+eval/num actions total                          50
+eval/path length Mean                           50
+eval/path length Std                             0
+eval/Rewards Mean                               -6.02817
+eval/Rewards Std                                 1.07651
+eval/Returns Mean                             -204.958
+eval/Returns Std                                 0
+eval/Actions Mean                                0.111114
+eval/Actions Std                                 0.314269
+eval/Num Paths                                   1
+eval/Average Returns                          -204.958
+eval/Task Returns Sum                            5.58922
+eval/Task Returns Avg                            0.111784
+eval/Num Rollout Success                         0
+eval/env_infos/final/success Mean                0
+eval/env_infos/final/success Std                 0
+eval/env_infos/initial/success Mean              0
+eval/env_infos/initial/success Std               0
+eval/env_infos/success Mean                      0
+eval/env_infos/success Std                       0
+eval/env_infos/final/percent_wiped Mean          0
+eval/env_infos/final/percent_wiped Std           0
+eval/env_infos/initial/percent_wiped Mean        0
+eval/env_infos/initial/percent_wiped Std         0
+eval/env_infos/percent_wiped Mean                0
+eval/env_infos/percent_wiped Std                 0
+eval/env_infos/final/f_excess_total Mean         0
+eval/env_infos/final/f_excess_total Std          0
+eval/env_infos/initial/f_excess_total Mean       0
+eval/env_infos/initial/f_excess_total Std        0
+eval/env_infos/f_excess_total Mean               0
+eval/env_infos/f_excess_total Std                0
+eval/env_infos/final/f_excess_max Mean           0
+eval/env_infos/final/f_excess_max Std            0
+eval/env_infos/initial/f_excess_max Mean         0
+eval/env_infos/initial/f_excess_max Std          0
+eval/env_infos/f_excess_max Mean                 0
+eval/env_infos/f_excess_max Std                  0
+eval/env_infos/final/f_excess_mean Mean          0
+eval/env_infos/final/f_excess_mean Std           0
+eval/env_infos/initial/f_excess_mean Mean        0
+eval/env_infos/initial/f_excess_mean Std         0
+eval/env_infos/f_excess_mean Mean                0
+eval/env_infos/f_excess_mean Std                 0
+eval/env_infos/final/reward_actions Mean         0.114322
+eval/env_infos/final/reward_actions Std          0
+eval/env_infos/initial/reward_actions Mean       1.42439
+eval/env_infos/initial/reward_actions Std        0
+eval/env_infos/reward_actions Mean               0.164389
+eval/env_infos/reward_actions Std                0.229236
+eval/env_infos/final/reward_skills Mean          0.114322
+eval/env_infos/final/reward_skills Std           0
+eval/env_infos/initial/reward_skills Mean        0.155899
+eval/env_infos/initial/reward_skills Std         0
+eval/env_infos/reward_skills Mean                0.115513
+eval/env_infos/reward_skills Std                 0.00703722
+eval/env_infos/final/num_ac_calls Mean           1
+eval/env_infos/final/num_ac_calls Std            0
+eval/env_infos/initial/num_ac_calls Mean        14
+eval/env_infos/initial/num_ac_calls Std          0
+eval/env_infos/num_ac_calls Mean                 1.47059
+eval/env_infos/num_ac_calls Std                  2.23916
+eval/env_infos/final/skill_complete Mean         1
+eval/env_infos/final/skill_complete Std          0
+eval/env_infos/initial/skill_complete Mean       1
+eval/env_infos/initial/skill_complete Std        0
+eval/env_infos/skill_complete Mean               1
+eval/env_infos/skill_complete Std                0
+eval/env_infos/final/aff_reward Mean             0.57801
+eval/env_infos/final/aff_reward Std              0
+eval/env_infos/initial/aff_reward Mean           1
+eval/env_infos/initial/aff_reward Std            0
+eval/env_infos/aff_reward Mean                   0.590421
+eval/env_infos/aff_reward Std                    0.0712985
+eval/env_infos/final/aff_success Mean            0
+eval/env_infos/final/aff_success Std             0
+eval/env_infos/initial/aff_success Mean          1
+eval/env_infos/initial/aff_success Std           0
+eval/env_infos/aff_success Mean                  0.0294118
+eval/env_infos/aff_success Std                   0.168958
+process/RAM Usage (Mb)                        3301
+process/Num Threads                             36
+time/data storing (s)                            4.8601e-05
+time/evaluation sampling (s)                     2.8193e-05
+time/exploration sampling (s)                    2.54256
+time/logging (s)                                 0.00262281
+time/sac training (s)                            0.718056
+time/saving (s)                                  0.00667879
+time/training (s)                                6.3671e-05
+time/epoch (s)                                   3.27006
+time/total (s)                                  80.2171
+Dummy                                            0
+Epoch                                            2
+--------------------------------------------  --------------
+2023-04-13 14:25:34.579036 CEST | [04-13-test_2023_04_13_14_24_06_0000--s-1222] Epoch 3 finished
+--------------------------------------------  --------------
+replay_buffer/size                              23
+trainer/num train calls                        200
+trainer/QF1 Loss                                30.5509
+trainer/QF2 Loss                                30.5364
+trainer/Policy Loss                             -5.19121
+trainer/Q1 Predictions Mean                      0.0201327
+trainer/Q1 Predictions Std                       0.018325
+trainer/Q2 Predictions Mean                      0.0212484
+trainer/Q2 Predictions Std                       0.0181417
+trainer/Q Targets Mean                           1.34426
+trainer/Q Targets Std                            5.37882
+trainer/Log Pis S Mean                          -1.09861
+trainer/Log Pis S Std                            0.000994382
+trainer/Log Pis P Mean                          -4.16449
+trainer/Log Pis P Std                            0.372792
+trainer/policy/softmax_task/logit Mean           2.00607e-05
+trainer/policy/softmax_task/logit Std            0.000978067
+trainer/policy/softmax_task/logit Max            0.00153476
+trainer/policy/softmax_task/logit Min           -0.0010229
+trainer/policy/softmax_task/logit_std Mean       0.000975774
+trainer/policy/softmax_task/logit_std Std        5.96105e-05
+trainer/policy/softmax_task/logit_range Mean     0.00220814
+trainer/policy/softmax_task/logit_range Std      0.000149066
+trainer/policy/softmax_task/logit_0 Mean         0
+trainer/policy/softmax_task/logit_0 Std          0
+trainer/policy/softmax_task/logit_1 Mean         0.000318182
+trainer/policy/softmax_task/logit_1 Std          0.000121231
+trainer/policy/softmax_task/logit_2 Mean         0.00220814
+trainer/policy/softmax_task/logit_2 Std          0.000149066
+trainer/policy/normal_param/mean Mean           -0.000305636
+trainer/policy/normal_param/mean Std             0.00427869
+trainer/policy/normal_param/std Mean             0.946457
+trainer/policy/normal_param/std Std              0.00372824
+trainer/policy/normal_param/std Max              0.957116
+trainer/policy/normal_param/std Min              0.937585
+trainer/policy/normal_param/log_std Mean        -0.0550371
+trainer/policy/normal_param/log_std Std          0.0039398
+trainer/Alpha S                                  0.99797
+trainer/Alpha S Loss                            -6.69878e-05
+trainer/Alpha P                                  0.99675
+trainer/Alpha P Loss                            -0.0133101
+expl/num steps total                           217
+expl/num paths total                             5
+expl/num actions total                         217
+expl/path length Mean                           49
+expl/path length Std                             0
+expl/Rewards Mean                               -2.49302
+expl/Rewards Std                                 4.96339
+expl/Returns Mean                              -17.4511
+expl/Returns Std                                 0
+expl/Actions Mean                                0.0556256
+expl/Actions Std                                 0.562953
+expl/Num Paths                                   1
+expl/Average Returns                           -17.4511
+expl/Task Returns Sum                          -29.8293
+expl/Task Returns Avg                           -0.608761
+expl/Num Rollout Success                         0
+expl/env_infos/final/success Mean                0
+expl/env_infos/final/success Std                 0
+expl/env_infos/initial/success Mean              0
+expl/env_infos/initial/success Std               0
+expl/env_infos/success Mean                      0
+expl/env_infos/success Std                       0
+expl/env_infos/final/percent_wiped Mean          0
+expl/env_infos/final/percent_wiped Std           0
+expl/env_infos/initial/percent_wiped Mean        0
+expl/env_infos/initial/percent_wiped Std         0
+expl/env_infos/percent_wiped Mean                0
+expl/env_infos/percent_wiped Std                 0
+expl/env_infos/final/f_excess_total Mean         2
+expl/env_infos/final/f_excess_total Std          0
+expl/env_infos/initial/f_excess_total Mean       0
+expl/env_infos/initial/f_excess_total Std        0
+expl/env_infos/f_excess_total Mean               0.857143
+expl/env_infos/f_excess_total Std                0.832993
+expl/env_infos/final/f_excess_max Mean           0
+expl/env_infos/final/f_excess_max Std            0
+expl/env_infos/initial/f_excess_max Mean         0
+expl/env_infos/initial/f_excess_max Std          0
+expl/env_infos/f_excess_max Mean                 0.285714
+expl/env_infos/f_excess_max Std                  0.451754
+expl/env_infos/final/f_excess_mean Mean          0
+expl/env_infos/final/f_excess_mean Std           0
+expl/env_infos/initial/f_excess_mean Mean        0
+expl/env_infos/initial/f_excess_mean Std         0
+expl/env_infos/f_excess_mean Mean                0.0166667
+expl/env_infos/f_excess_mean Std                 0.0267261
+expl/env_infos/final/reward_actions Mean         0.426359
+expl/env_infos/final/reward_actions Std          0
+expl/env_infos/initial/reward_actions Mean       0.0229646
+expl/env_infos/initial/reward_actions Std        0
+expl/env_infos/reward_actions Mean              -4.26133
+expl/env_infos/reward_actions Std                9.15624
+expl/env_infos/final/reward_skills Mean          0.426359
+expl/env_infos/final/reward_skills Std           0
+expl/env_infos/initial/reward_skills Mean        0.0229646
+expl/env_infos/initial/reward_skills Std         0
+expl/env_infos/reward_skills Mean               -0.425001
+expl/env_infos/reward_skills Std                 0.892267
+expl/env_infos/final/num_ac_calls Mean           1
+expl/env_infos/final/num_ac_calls Std            0
+expl/env_infos/initial/num_ac_calls Mean         1
+expl/env_infos/initial/num_ac_calls Std          0
+expl/env_infos/num_ac_calls Mean                 7
+expl/env_infos/num_ac_calls Std                  7.42582
+expl/env_infos/final/skill_complete Mean         1
+expl/env_infos/final/skill_complete Std          0
+expl/env_infos/initial/skill_complete Mean       1
+expl/env_infos/initial/skill_complete Std        0
+expl/env_infos/skill_complete Mean               0.714286
+expl/env_infos/skill_complete Std                0.451754
+expl/env_infos/final/aff_reward Mean             1
+expl/env_infos/final/aff_reward Std              0
+expl/env_infos/initial/aff_reward Mean           1
+expl/env_infos/initial/aff_reward Std            0
+expl/env_infos/aff_reward Mean                   0.862132
+expl/env_infos/aff_reward Std                    0.337706
+expl/env_infos/final/aff_success Mean            1
+expl/env_infos/final/aff_success Std             0
+expl/env_infos/initial/aff_success Mean          1
+expl/env_infos/initial/aff_success Std           0
+expl/env_infos/aff_success Mean                  0.857143
+expl/env_infos/aff_success Std                   0.349927
+eval/num steps total                            50
+eval/num paths total                             1
+eval/num actions total                          50
+eval/path length Mean                           50
+eval/path length Std                             0
+eval/Rewards Mean                               -6.02817
+eval/Rewards Std                                 1.07651
+eval/Returns Mean                             -204.958
+eval/Returns Std                                 0
+eval/Actions Mean                                0.111114
+eval/Actions Std                                 0.314269
+eval/Num Paths                                   1
+eval/Average Returns                          -204.958
+eval/Task Returns Sum                            5.58922
+eval/Task Returns Avg                            0.111784
+eval/Num Rollout Success                         0
+eval/env_infos/final/success Mean                0
+eval/env_infos/final/success Std                 0
+eval/env_infos/initial/success Mean              0
+eval/env_infos/initial/success Std               0
+eval/env_infos/success Mean                      0
+eval/env_infos/success Std                       0
+eval/env_infos/final/percent_wiped Mean          0
+eval/env_infos/final/percent_wiped Std           0
+eval/env_infos/initial/percent_wiped Mean        0
+eval/env_infos/initial/percent_wiped Std         0
+eval/env_infos/percent_wiped Mean                0
+eval/env_infos/percent_wiped Std                 0
+eval/env_infos/final/f_excess_total Mean         0
+eval/env_infos/final/f_excess_total Std          0
+eval/env_infos/initial/f_excess_total Mean       0
+eval/env_infos/initial/f_excess_total Std        0
+eval/env_infos/f_excess_total Mean               0
+eval/env_infos/f_excess_total Std                0
+eval/env_infos/final/f_excess_max Mean           0
+eval/env_infos/final/f_excess_max Std            0
+eval/env_infos/initial/f_excess_max Mean         0
+eval/env_infos/initial/f_excess_max Std          0
+eval/env_infos/f_excess_max Mean                 0
+eval/env_infos/f_excess_max Std                  0
+eval/env_infos/final/f_excess_mean Mean          0
+eval/env_infos/final/f_excess_mean Std           0
+eval/env_infos/initial/f_excess_mean Mean        0
+eval/env_infos/initial/f_excess_mean Std         0
+eval/env_infos/f_excess_mean Mean                0
+eval/env_infos/f_excess_mean Std                 0
+eval/env_infos/final/reward_actions Mean         0.114322
+eval/env_infos/final/reward_actions Std          0
+eval/env_infos/initial/reward_actions Mean       1.42439
+eval/env_infos/initial/reward_actions Std        0
+eval/env_infos/reward_actions Mean               0.164389
+eval/env_infos/reward_actions Std                0.229236
+eval/env_infos/final/reward_skills Mean          0.114322
+eval/env_infos/final/reward_skills Std           0
+eval/env_infos/initial/reward_skills Mean        0.155899
+eval/env_infos/initial/reward_skills Std         0
+eval/env_infos/reward_skills Mean                0.115513
+eval/env_infos/reward_skills Std                 0.00703722
+eval/env_infos/final/num_ac_calls Mean           1
+eval/env_infos/final/num_ac_calls Std            0
+eval/env_infos/initial/num_ac_calls Mean        14
+eval/env_infos/initial/num_ac_calls Std          0
+eval/env_infos/num_ac_calls Mean                 1.47059
+eval/env_infos/num_ac_calls Std                  2.23916
+eval/env_infos/final/skill_complete Mean         1
+eval/env_infos/final/skill_complete Std          0
+eval/env_infos/initial/skill_complete Mean       1
+eval/env_infos/initial/skill_complete Std        0
+eval/env_infos/skill_complete Mean               1
+eval/env_infos/skill_complete Std                0
+eval/env_infos/final/aff_reward Mean             0.57801
+eval/env_infos/final/aff_reward Std              0
+eval/env_infos/initial/aff_reward Mean           1
+eval/env_infos/initial/aff_reward Std            0
+eval/env_infos/aff_reward Mean                   0.590421
+eval/env_infos/aff_reward Std                    0.0712985
+eval/env_infos/final/aff_success Mean            0
+eval/env_infos/final/aff_success Std             0
+eval/env_infos/initial/aff_success Mean          1
+eval/env_infos/initial/aff_success Std           0
+eval/env_infos/aff_success Mean                  0.0294118
+eval/env_infos/aff_success Std                   0.168958
+process/RAM Usage (Mb)                        3301
+process/Num Threads                             36
+time/data storing (s)                            5.055e-05
+time/evaluation sampling (s)                     3.2223e-05
+time/exploration sampling (s)                    3.45015
+time/logging (s)                                 0.00262987
+time/sac training (s)                            0.724834
+time/saving (s)                                  0.00648436
+time/training (s)                                5.3016e-05
+time/epoch (s)                                   4.18423
+time/total (s)                                  84.4276
+Dummy                                            0
+Epoch                                            3
+--------------------------------------------  --------------
