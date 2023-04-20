@@ -18,7 +18,6 @@ from maple.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
 import numpy as np
 import torch
 
-
 # Takes in 'variant' dictionary as input which contains parameters about the framework
 # It is extracted from different base_variant configurations (for diff hyperparams) according to training.py
 def experiment(variant):
@@ -38,8 +37,15 @@ def experiment(variant):
         # Specify Franka Emika Panda robot
         robot_type = env_variant.get('robot_type', 'Panda')
 
+        print('ROBOT KEYS',env_variant['robot_keys'])
+        
         # Specifies which observations from the environment to use
         obs_keys = env_variant['robot_keys'] + env_variant['obj_keys']
+
+        print('CONTROLLER kp:', controller_config['kp'])
+        print('CONTROLLER impedance_mode:', controller_config['impedance_mode'])
+        print('CONTROLLER kp_limits:', controller_config['kp_limits'])
+        print('CONTROLLER damping_ratio:', controller_config['damping_ratio'])
 
         # Make environment
         env = suite.make(
@@ -53,8 +59,7 @@ def experiment(variant):
             **env_variant['env_kwargs']
         )
 
-        # Wrapper for OpenAI Gym environment
-        env = GymWrapper(env, keys=obs_keys)
+        env = GymWrapper(env, keys=obs_keys)         # Wrapper for OpenAI Gym environment
 
         return env
 
@@ -62,11 +67,9 @@ def experiment(variant):
     expl_env = make_env(mode='expl')
     eval_env = make_env(mode='eval')
 
-
     # Identify dimension of observation and action spaces
     obs_dim = expl_env.observation_space.low.size
     action_dim = eval_env.action_space.low.size
-
 
     # Setup 4 neural networks that: Concatenate inputs along dimension and then pass them through an MLP
     M = variant['layer_size']
@@ -95,7 +98,12 @@ def experiment(variant):
     action_dim_s = getattr(expl_env, "action_skill_dim", 0)     # action_dim_s is the dimension of available skills for the task
     action_dim_p = action_dim - action_dim_s     # action_dim_p is used to compute the maximum parameter dimension over all primitive actions. 
 
-    print('ACTION_DIM_S',action_dim_s)
+    # print('EXPLORATION ACTION SPACE:', expl_env.action_space)
+    # print('EVALUATION ACTION SPACE:', eval_env.action_space)
+    print('ACTION_DIM:',action_dim)
+    print('ACTION_DIM_S:',action_dim_s)
+    print('ACTION_DIM_P:',action_dim_p)
+
 
     # +- If the environment has only one/no skills, then it should be initialized without considering action skills (I assume this means just atomic)
     if action_dim_s == 0:
@@ -208,9 +216,18 @@ def experiment(variant):
         video_save_func = get_video_save_func(variant)
         algorithm.post_epoch_funcs.append(video_save_func)
 
+    ckpt_flag = False
     if 'ckpt_path' in variant:
+        ckpt_flag = True
+        # print('Received ckpt_path:', variant['ckpt_path'])
+        # print('Received ckpt_epoch:', variant['ckpt_epoch'])
         ckpt_update_func = get_ckpt_update_func(variant)
         algorithm.pre_epoch_funcs.insert(0, ckpt_update_func)
+
+    if ckpt_flag:
+        print('Training from checkpoint #',variant['ckpt_epoch'], '...')
+    else:
+        print('Training...')
 
     algorithm.to(ptu.device)
     algorithm.train(start_epoch=variant.get('ckpt_epoch', 0))
@@ -253,7 +270,7 @@ def get_video_save_func(variant):
     from maple.samplers.rollout_functions import rollout
     from maple.launchers.visualization import dump_video
 
-    save_period = variant.get('save_video_period', 50)
+    save_period = variant.get('save_video_period', 10) # was 50
     dump_video_kwargs = variant.get("dump_video_kwargs", dict())
     dump_video_kwargs['horizon'] = variant['algorithm_kwargs']['max_path_length']
 
