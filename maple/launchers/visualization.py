@@ -74,6 +74,25 @@ def dump_video(
             skill_name = skill_name_map[skill]
             ac_str = skill_name
 
+            ##########
+            curr_action = rollout_actions[i][j]
+            # print('curr_action.shape',curr_action.shape)
+#            print('curr_action',curr_action)
+#            print('skill_name_map',skill_name_map.keys())
+            skill_names, _ = sc.get_skill_names_and_colors()
+            print_impedance = True
+#            if curr_action.shape[0]>num_skills+9:
+#                print('it is')
+            if print_impedance:
+                kp = curr_action[len(skill_names):len(skill_names)+6]
+                kp_min = np.full(6,25)
+                kp_max = np.full(6,200)
+                norm_min = np.full(6,-1)
+                norm_max = np.full(6,1)
+                kp = ((kp - norm_min) / (norm_max - norm_min)) * (kp_max - kp_min) + kp_min
+                ac_str = skill_name + str(np.round(kp[:3])) # i added this                
+            ###############
+
             success = successes[i][max(j-1, 0)]
 
             for img in imgs:
@@ -180,6 +199,9 @@ def dump_skillmap(
             skill_ids[i][j] = skill_id
             if j-1 >= 0 and successes[i][j-1]:
                 skill_ids[i][j] += num_skills
+        print('ac',ac)
+        print('skill_ids',skill_ids)
+        print('++++++++++++++++++++++++++')
 
     colors.insert(0, "white")
     colors_rgba = []
@@ -259,8 +281,11 @@ def annotate_image(img, text, imsize=84, color=(0, 0, 255), loc='ll'):
         raise ValueError
     fontFace = 0
 
+    thickness = 2
+    fontScale = 0.65 * fontScale
+
     textsize = cv2.getTextSize(text, fontFace, fontScale, thickness)[0]
-    textX = int((img.shape[1] - textsize[0]) / 2)
+    textX = int((img.shape[1] - textsize[0]) / 2) # shifts its location left/right
     cv2.putText(img=img, text=text, org=(textX, org[1]), fontFace=fontFace, fontScale=fontScale,
                 color=color, thickness=thickness)
     return img

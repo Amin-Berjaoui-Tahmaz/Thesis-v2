@@ -18,60 +18,42 @@ from maple.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
 import numpy as np
 import torch
 
-# Takes in 'variant' dictionary as input which contains parameters about the framework
-# It is extracted from different base_variant configurations (for diff hyperparams) according to training.py
 def experiment(variant):
-    # Takes in 'mode' as input representing either exploration (training) or evaluation
     def make_env(mode):
         assert mode in ['expl', 'eval']
         torch.set_num_threads(1)
 
-        # Extract env_variant since it contains the parameters to setup the environment 
         env_variant = variant['env_variant']
 
-        # Get controller type from env_variant
         controller_config = load_controller_config(default_controller=env_variant['controller_type'])
         controller_config_update = env_variant.get('controller_config_update', {})
         controller_config.update(controller_config_update)
 
-        # Specify Franka Emika Panda robot
         robot_type = env_variant.get('robot_type', 'Panda')
 
-        print('ROBOT KEYS',env_variant['robot_keys'])
-        
-        # Specifies which observations from the environment to use
         obs_keys = env_variant['robot_keys'] + env_variant['obj_keys']
 
-        print('CONTROLLER kp:', controller_config['kp'])
-        print('CONTROLLER impedance_mode:', controller_config['impedance_mode'])
-        print('CONTROLLER kp_limits:', controller_config['kp_limits'])
-        print('CONTROLLER damping_ratio:', controller_config['damping_ratio'])
-
-        # Make environment
         env = suite.make(
             env_name=env_variant['env_type'],
             robots=robot_type,
-            has_renderer=False, # on-screen renderer is off
-            has_offscreen_renderer=True, # off-screen renderer is on
+            has_renderer=False,
+            has_offscreen_renderer=True,
             use_camera_obs=False,
             controller_configs=controller_config,
 
             **env_variant['env_kwargs']
         )
 
-        env = GymWrapper(env, keys=obs_keys)         # Wrapper for OpenAI Gym environment
+        env = GymWrapper(env, keys=obs_keys)
 
         return env
 
-    # Make exploration and evaluation environments
     expl_env = make_env(mode='expl')
     eval_env = make_env(mode='eval')
 
-    # Identify dimension of observation and action spaces
     obs_dim = expl_env.observation_space.low.size
     action_dim = eval_env.action_space.low.size
 
-    # Setup 4 neural networks that: Concatenate inputs along dimension and then pass them through an MLP
     M = variant['layer_size']
     qf1 = ConcatMlp(
         input_size=obs_dim + action_dim,
@@ -94,18 +76,8 @@ def experiment(variant):
         hidden_sizes=[M, M],
     )
 
-
-    action_dim_s = getattr(expl_env, "action_skill_dim", 0)     # action_dim_s is the dimension of available skills for the task
-    action_dim_p = action_dim - action_dim_s     # action_dim_p is used to compute the maximum parameter dimension over all primitive actions. 
-
-    # print('EXPLORATION ACTION SPACE:', expl_env.action_space)
-    # print('EVALUATION ACTION SPACE:', eval_env.action_space)
-    print('ACTION_DIM:',action_dim)
-    print('ACTION_DIM_S:',action_dim_s)
-    print('ACTION_DIM_P:',action_dim_p)
-
-
-    # +- If the environment has only one/no skills, then it should be initialized without considering action skills (I assume this means just atomic)
+    action_dim_s = getattr(expl_env, "action_skill_dim", 0)
+    action_dim_p = action_dim - action_dim_s
     if action_dim_s == 0:
         trainer_class = SACTrainer
         policy = TanhGaussianPolicy(
@@ -124,13 +96,11 @@ def experiment(variant):
 
         variant['trainer_kwargs']['target_entropy_config'] = target_entropy_config
 
-    # If there are skills, then do the following:
     else:
         trainer_class = SACHybridTrainer
         policy_kwargs = {}
         policy_class = PAMDPPolicy
 
-        # Get the pamdp_variant configuration which contains the PAMDP-specific parameters
         pamdp_variant = variant.get('pamdp_variant', {})
 
         for k in [
@@ -197,8 +167,8 @@ def experiment(variant):
     )
 
     if 'ckpt_epoch' in variant:
-        variant['algorithm_kwargs']['num_epochs'] = variant['ckpt_epoch']
-        variant['algorithm_kwargs']['eval_epoch_freq'] = 1
+#        variant['algorithm_kwargs']['num_epochs'] = 50 #variant['ckpt_epoch']
+        variant['algorithm_kwargs']['eval_epoch_freq'] = 10
 
     algorithm = TorchBatchRLAlgorithm(
         trainer=trainer,
@@ -216,26 +186,13 @@ def experiment(variant):
         video_save_func = get_video_save_func(variant)
         algorithm.post_epoch_funcs.append(video_save_func)
 
-    ckpt_flag = False
     if 'ckpt_path' in variant:
-        ckpt_flag = True
-        # print('Received ckpt_path:', variant['ckpt_path'])
-        # print('Received ckpt_epoch:', variant['ckpt_epoch'])
         ckpt_update_func = get_ckpt_update_func(variant)
         algorithm.pre_epoch_funcs.insert(0, ckpt_update_func)
 
-    if ckpt_flag:
-        print('Training from checkpoint #',variant['ckpt_epoch'], '...')
-    else:
-        print('Training...')
 
     algorithm.to(ptu.device)
     algorithm.train(start_epoch=variant.get('ckpt_epoch', 0))
-
-
-
-
-
 
 def get_ckpt_update_func(variant):
     import os.path as osp
@@ -243,7 +200,7 @@ def get_ckpt_update_func(variant):
     from maple.launchers.conf import LOCAL_LOG_DIR
 
     def ckpt_update_func(algo, epoch):
-        if epoch == variant.get('ckpt_epoch', None) or epoch % algo._eval_epoch_freq == 0:
+        if epoch == variant.get('ckpt_epoch', None): #or epoch % algo._eval_epoch_freq == 0:
             filename = osp.join(LOCAL_LOG_DIR, variant['ckpt_path'], 'itr_%d.pkl' % epoch)
             try:
                 print("Loading ckpt from", filename)
@@ -270,7 +227,7 @@ def get_video_save_func(variant):
     from maple.samplers.rollout_functions import rollout
     from maple.launchers.visualization import dump_video
 
-    save_period = variant.get('save_video_period', 10) # was 50
+    save_period = variant.get('save_video_period', 50)
     dump_video_kwargs = variant.get("dump_video_kwargs", dict())
     dump_video_kwargs['horizon'] = variant['algorithm_kwargs']['max_path_length']
 
