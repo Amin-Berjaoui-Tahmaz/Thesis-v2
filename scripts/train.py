@@ -7,22 +7,15 @@ import collections
 
 base_variant = dict(
 
-    # ckpt_path = '/home/amin/Desktop/maple/data/lift/05-24-test/05-24-test_2023_05_24_12_13_22_0000--s-49217',
-    # ckpt_epoch = 390,
-
-#    ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod/05-20-test/05-20-test_2023_05_20_01_48_06_0000--s-33186',
-#    ckpt_epoch = 170, # training this till 200 and check if it is consistently reaching like in dashboard results at epoch 200
-    # expanding the parameters caused 
-
-    #wipe_mod
-#    ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod/05-25-test/05-25-test_2023_05_25_01_24_13_0000--s-22034',
-#    ckpt_epoch = 210,
+    # env: 
+    # ckpt_path = ,
+    # ckpt_epoch = ,
 
     layer_size=256,
     replay_buffer_size=int(1E6),
     rollout_fn_kwargs=dict(
         terminals_all_false=True,
-    ),
+    ),  
     algorithm_kwargs=dict(
         num_epochs=10000,
         num_expl_steps_per_train_loop=3000,
@@ -219,7 +212,7 @@ env_params = dict(
         'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [[0.15, 0.25, 0.03]],
         'env_variant.env_kwargs.skill_config.grasp_config.aff_threshold': [[0.15, 0.25, 0.03]],
         'env_variant.env_kwargs.skill_config.push_config.aff_threshold': [[0.15, 0.25, 0.03]],
-        'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach', 'push']],
+        'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach','push']],
     },
     wipe_mod={
         'env_variant.env_type': ['Wipe'],
@@ -228,7 +221,7 @@ env_params = dict(
         'algorithm_kwargs.max_path_length': [300],
         'env_variant.controller_type': ['OSC_POSITION'],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
-        'env_variant.controller_config_update.kp_limits': [[0,200]],
+#        'env_variant.controller_config_update.kp_limits': [[0,200]],
 #        'env_variant.controller_config_update.control_ori': [False],
         'env_variant.controller_config_update.position_limits': [[[-0.10, -0.30, 0.75], [0.20, 0.30, 1.00]]],
         'env_variant.env_kwargs.table_offset':[[0.05, 0, 0.8]],
@@ -245,6 +238,28 @@ env_params = dict(
 #        'env_variant.env_kwargs.skill_config.grasp_config.use_ori_params': [False],
         'env_variant.env_kwargs.skill_config.push_config.aff_threshold': [[0.15, 0.25, 0.03]],
 #        'env_variant.env_kwargs.skill_config.push_config.use_ori_params': [False],
+        'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach', 'push']],
+    },
+    wipe_mod_env={
+        'env_variant.env_type': ['WipeMod'],
+        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
+        'env_variant.obj_keys': [['robot0_contact-obs', 'object-state']],
+        'algorithm_kwargs.max_path_length': [300],
+        'env_variant.controller_type': ['OSC_POSITION'],
+        'env_variant.controller_config_update.impedance_mode':['variable_kp'],
+        'env_variant.controller_config_update.position_limits': [[[-0.10, -0.30, 0.75], [0.20, 0.30, 1.00]]],
+        'env_variant.env_kwargs.reward_scale':[2.0], # reward scaling makes it act more as a position controller in terms of percent wiped and etc.
+        'env_variant.env_kwargs.table_offset':[[0.05, 0, 0.8]],
+        'env_variant.env_kwargs.skill_config.base_config.global_xyz_bounds': [
+            [[-0.10, -0.30, 0.75], [0.20, 0.30, 1.00]]],
+        'env_variant.env_kwargs.skill_config.grasp_config.global_xyz_bounds': [
+            [[-0.10, -0.30, 0.80], [0.20, 0.30, 0.85]]],
+        'env_variant.env_kwargs.skill_config.push_config.global_xyz_bounds': [
+            [[-0.10, -0.30, 0.80], [0.20, 0.30, 0.85]]],
+        'env_variant.env_kwargs.skill_config.base_config.aff_threshold': [[0.15, 0.25, 0.03]],
+        'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [[0.15, 0.25, 0.03]],
+        'env_variant.env_kwargs.skill_config.grasp_config.aff_threshold': [[0.15, 0.25, 0.03]],
+        'env_variant.env_kwargs.skill_config.push_config.aff_threshold': [[0.15, 0.25, 0.03]],
         'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach', 'push']],
     },
     stack={
