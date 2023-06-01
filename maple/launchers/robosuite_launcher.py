@@ -18,8 +18,14 @@ from maple.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
 import numpy as np
 import torch
 
+from robosuite.environments.base import register_env # for registering modified env
+from robosuite.environments.manipulation.wipe_modified import WipeMod # for registering modified env
+
 def experiment(variant):
     def make_env(mode):
+
+        register_env(WipeMod) # register env
+
         assert mode in ['expl', 'eval']
         torch.set_num_threads(1)
 
