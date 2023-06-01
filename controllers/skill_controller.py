@@ -145,18 +145,15 @@ class SkillController:
         self._ori_is_delta = ori_is_delta
         self._num_ac_calls += 1
 
+#        print('ori',ori)
+#        print('impedance_ori',impedance_ori)
+
         rc_dim = self._env.robots[0].controller.control_dim
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
             return np.concatenate([pos, ori, action_g])
         else:
 #            impedance_pos = [150,150,150]
-            impedance_ori = [30,30,30]
-            # print('impedance_pos',impedance_pos)
-            # print('impedance_ori',impedance_ori)
-            # print('pos',pos)
-            # print('ori',ori)
-            # print('action_g',action_g)
-#            print('output',np.concatenate([impedance_pos, impedance_ori, pos, ori, action_g]))
+            impedance_ori = [150,150,impedance_ori[2]]
             return np.concatenate([impedance_pos, impedance_ori, pos, ori, action_g])
 
     def _get_info(self):

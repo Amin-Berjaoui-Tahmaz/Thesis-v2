@@ -121,22 +121,31 @@ class BaseSkill:
             return False
 
     def _compute_aff_reward_and_success(self, info):
+        # if 'aff_type' is None, reward is 1 (meaning the affordance info is not being used)
         if self._config['aff_type'] is None:
             return 1.0, True
 
+        # Retreive the affordance centers and reaching positions
         aff_centers = self._get_aff_centers(info)
         reach_pos = self._get_reach_pos(info)
 
+        # If affordance centers is None (such as the case of Atomic and GripperSkill), 
+        # then return 1.0 reward and success is True
         if aff_centers is None:
             return 1.0, True
+        # SIDE NOTE: I think the reason atomic is spammed early on is because you get a reward for just using it
 
+        # If there are no affordance centers (object keypoints), 
+        # then 0 reward and success is False
         if len(aff_centers) == 0:
             return 0.0, False
 
-        th = self._config['aff_threshold']
-        within_th = (np.abs(aff_centers - reach_pos) <= th)
-        aff_success = np.any(np.all(within_th, axis=1))
+        th = self._config['aff_threshold'] # retreive pre-defined affordance threshold
+        within_th = (np.abs(aff_centers - reach_pos) <= th) # check if the executed skill is within range of the threshold 
+        aff_success = np.any(np.all(within_th, axis=1)) # return that it is successful if it is in range
 
+        # If the affordance type is 'dense', then the affordance reward increases the 
+        # closer it is to the keypoint IF IT IS SOMEWHERE OUTSIDE THE THRESHOLD AREA
         if self._config['aff_type'] == 'dense':
             if aff_success:
                 aff_reward = 1.0
@@ -737,11 +746,11 @@ class PushSkill(BaseSkill):
         pos = src_pos.copy()
 
 #        print('params',params)
-        rc_dim = self._config['robot_controller_dim']
-        if rc_dim==3: # representing OSC_POSITION and OSC_POSITION_YAW
-            delta_pos = params[-3:].copy() # INVESTIGATE MAYBE?
-        else:
-            delta_pos = params[-4:-1].copy()
+#        rc_dim = self._config['robot_controller_dim']
+#        if rc_dim==3 or rc_dim==9: # representing OSC_POSITION
+        delta_pos = params[-3:].copy() # INVESTIGATE MAYBE? #if wiping gets worse, then just make this [-4:-1]
+#        elif rc_dim==4 or rc_dim==10: # representing OSC_POSITION_YAW
+#            delta_pos = params[-4:-1].copy()
         delta_pos = np.clip(delta_pos, -1, 1)
         delta_pos *= self._config['delta_xyz_scale']
         pos += delta_pos

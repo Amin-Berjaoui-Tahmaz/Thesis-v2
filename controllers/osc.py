@@ -142,7 +142,8 @@ class OperationalSpaceController(Controller):
         self.use_delta = control_delta
 
         # Control dimension
-        self.control_dim = 6 if self.use_ori else 3
+        self.control_dim = 6 if self.use_ori else 3 # i changed this
+#        self.control_dim = 4 if self.use_ori else 3
         self.name_suffix = "POSE" if self.use_ori else "POSITION"
 
         # input and output max and min (allow for either explicit lists or single numbers)
@@ -180,7 +181,7 @@ class OperationalSpaceController(Controller):
         if self.impedance_mode == "variable":
             self.control_dim += 12
         elif self.impedance_mode == "variable_kp":
-            self.control_dim += 6
+            self.control_dim += 6 # i changed this
 
         # limits
         self.position_limits = np.array(position_limits) if position_limits is not None else position_limits
@@ -205,7 +206,6 @@ class OperationalSpaceController(Controller):
 
     def get_global_euler_from_ori_ac(self, ori_ac):
         norm_euler = np.clip(ori_ac, -1, 1)
-#        print('norm_euler',norm_euler)
         # find ori dims that are dummy dims
         dcd = self.dummy_control_dims
         dummy_ori_dims = dcd[np.where(dcd >= 3)] - 3
@@ -348,6 +348,7 @@ class OperationalSpaceController(Controller):
         vel_pos_error = -self.ee_pos_vel
 
         # F_r = kp * pos_err + kd * vel_err
+        print(self.kp)
         desired_force = (np.multiply(np.array(position_error), np.array(self.kp[0:3]))
                          + np.multiply(vel_pos_error, self.kd[0:3]))
 
@@ -426,6 +427,7 @@ class OperationalSpaceController(Controller):
                 - (np.array) minimum action values
                 - (np.array) maximum action values
         """
+
         input_min = np.delete(self.input_min, self.dummy_control_dims)
         input_max = np.delete(self.input_max, self.dummy_control_dims)
 
