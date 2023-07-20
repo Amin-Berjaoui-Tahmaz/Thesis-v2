@@ -25,12 +25,13 @@ base_variant = dict(
     ),
     num_eval_rollouts=50,
 
-    # ckpt_epoch=100, #### uncomment if you want to evaluate a specific epoch ckeckpoint only ###
+#    ckpt_epoch=160, #### uncomment if you want to evaluate a specific epoch ckeckpoint only ###
 )
 
 env_params = dict(
     lift={
         'ckpt_path': [
+#        '/home/amin/Desktop/maple/data/lift/06-28-no-push/06-28-no-push_2023_06_28_13_41_39_0000--s-81154',
             ### Add paths here ###
         ],
     },
