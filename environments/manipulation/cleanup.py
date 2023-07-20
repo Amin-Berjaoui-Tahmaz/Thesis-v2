@@ -20,6 +20,17 @@ DEFAULT_CLEANUP_CONFIG = {
     'num_push_objs': 1,
     'shaped_push_rew': False,
     'push_scale_fac': 5.0,
+
+    'task_complete_reward': 3,
+    'excess_force_penalty_mul': 0.01,
+    'energy_penalty_mul': 0.003, #amin
+
+    'table_friction': [1., 5e-3, 1e-4],        # Friction parameters for the table
+    'table_friction_std': 0, #[0.02, 0.003, 0.0001], #amin                       # Standard deviation to sample different friction parameters for the table each episode
+    'table_height': 0.0,                            # Additional height of the table over the default location
+    'table_height_std': 0.0,  #amin                       # Standard deviation to sample different heigths of the table each episode
+
+    "pressure_threshold_max": 20.,                  # maximum force allowed (N)
 }
 
 
@@ -184,6 +195,23 @@ class Cleanup(SingleArmEnv):
         if task_config is not None:
             assert all([k in self.task_config for k in task_config])
             self.task_config.update(task_config)
+
+        # force stuff
+        self.excess_force_penalty_mul = self.task_config['excess_force_penalty_mul']
+        self.energy_penalty_mul = self.task_config['energy_penalty_mul'] # amin
+        self.pressure_threshold_max = self.task_config['pressure_threshold_max']
+        self.task_complete_reward = self.task_config['task_complete_reward']
+
+        # ee resets
+        self.ee_force_bias = np.zeros(3)
+        self.ee_torque_bias = np.zeros(3)
+
+        # set other wipe-specific attributes
+        self.collisions = 0
+        self.f_excess_total = 0
+        self.force_ee = 0 #amin
+        self.total_js_energy = 0 #amin
+        self.stiffness = np.array([1,1,1])
 
         super().__init__(
             robots=robots,
@@ -376,12 +404,55 @@ class Cleanup(SingleArmEnv):
 
         return info
 
+
+    def _post_action(self, action):
+
+        reward, done, info = super()._post_action(action)
+
+        # Update force bias
+        if np.linalg.norm(self.ee_force_bias) == 0:
+            self.ee_force_bias = self.robots[0].ee_force
+            self.ee_torque_bias = self.robots[0].ee_torque
+
+        total_force_ee = np.linalg.norm(np.array(self.robots[0].recent_ee_forcetorques.current[:3]))
+        self._force_ee_max = max(self._force_ee_max, total_force_ee)
+        self._force_ee_mean = (self._force_ee_mean * self._num_steps + total_force_ee) / (self._num_steps + 1)
+        self._f_excess_mean = (self._f_excess_mean * self._num_steps + float(total_force_ee > self.pressure_threshold_max)) \
+                              / (self._num_steps + 1)
+        self._num_steps += 1
+
+        force_ee = self._force_ee_max
+
+        if total_force_ee > self.pressure_threshold_max:
+            self.f_excess_total += 1
+
+        # Penalty for excessive force with the end-effector
+        #if force_ee > self.pressure_threshold_max:
+        #    reward -= ((self.excess_force_penalty_mul * force_ee) * self.reward_scale / self.task_complete_reward)
+
+        self.total_js_energy = np.sum(self.robots[0].js_energy) # amin
+        #reward -= ((self.energy_penalty_mul*self.total_js_energy) * self.reward_scale / self.task_complete_reward) # amin
+
+        self.force_ee = force_ee
+        self.stiffness = action[:3]
+
+        info['success'] = self._check_success()
+        info['f_excess_total'] = self.f_excess_total
+        info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
+        info['f_excess_mean'] = self._f_excess_mean
+        info['force_ee'] = force_ee # amin
+        info['energy_used'] = self.total_js_energy #amin
+        info['stiffness'] = self.stiffness
+
+        return reward, done, info
+
     def _get_skill_info(self):
         pos_info = dict(
             grasp=[],
             push=[],
             reach=[],
         )
+        force_info = {} # I added this and everything related to force in this function
 
         bin_pos = self.sim.data.body_xpos[self.bin_body_id].copy()
         obj_positions = self.obj_positions
@@ -396,9 +467,20 @@ class Cleanup(SingleArmEnv):
         pos_info['push'] += push_objs
         pos_info['reach'].append(drop_pos)
 
+        force_info['f_excess_total'] = self.f_excess_total
+        force_info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
+        force_info['f_excess_mean'] = self._f_excess_mean
+        force_info['force_ee_max'] = self._force_ee_max
+        force_info['force_ee'] = self.force_ee # amin
+        force_info['energy_used'] = self.total_js_energy #amin
+        force_info['stiffness'] = self.stiffness
+
         info = {}
         for k in pos_info:
             info[k + '_pos'] = pos_info[k]
+
+        for f in force_info:
+            info[f + '_force'] = force_info[f]
 
         return info
     
@@ -558,6 +640,12 @@ class Cleanup(SingleArmEnv):
 
         self.bin_body_id = self.sim.model.body_name2id("bin")
 
+    def _reset_skill(self):
+        self._force_ee_max = 0
+        self._force_ee_mean = 0
+        self._f_excess_mean = 0
+        self._num_steps = 0
+
     def _reset_internal(self):
         """
         Resets simulation internal configurations.
@@ -581,6 +669,15 @@ class Cleanup(SingleArmEnv):
             # Loop through all objects and reset their positions
             for obj_pos, obj_quat, obj in object_placements.values():
                 self.sim.data.set_joint_qpos(obj.joints[0], np.concatenate([np.array(obj_pos), np.array(obj_quat)]))
+
+        # Reset all internal vars for this wipe task
+        self.timestep = 0
+        self.collisions = 0
+        self.f_excess_total = 0
+
+        # ee resets - bias at initial state
+        self.ee_force_bias = np.zeros(3)
+        self.ee_torque_bias = np.zeros(3)
 
     def _get_observation(self):
         """

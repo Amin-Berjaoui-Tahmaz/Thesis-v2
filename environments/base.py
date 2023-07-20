@@ -10,7 +10,6 @@ import numpy as np
 
 REGISTERED_ENVS = {}
 
-
 def register_env(target_class):
     REGISTERED_ENVS[target_class.__name__] = target_class
 
@@ -33,6 +32,8 @@ def make(env_name, *args, **kwargs):
         Exception: [Invalid environment name]
     """
     if env_name not in REGISTERED_ENVS:
+
+#        print(REGISTERED_ENVS)
         raise Exception(
             "Environment {} not found. Make sure it is a registered environment among: {}".format(
                 env_name, ", ".join(REGISTERED_ENVS)

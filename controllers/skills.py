@@ -65,7 +65,10 @@ class BaseSkill:
         rc_dim = self._config['robot_controller_dim']
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
             ori = params[3:rc_dim].copy()
-            impedance_ori = [-1001,-1001,-1001]
+            impedance_ori = 999
+        elif rc_dim==6 or rc_dim==7: # representing osc.py with 3 translational stiffness values
+            ori = params[6:rc_dim].copy()
+            impedance_ori = 999
         else:
             ori = params[9:rc_dim].copy()
             impedance_ori = params[3:6].copy()
@@ -121,32 +124,28 @@ class BaseSkill:
             return False
 
     def _compute_aff_reward_and_success(self, info):
-        # if 'aff_type' is None, reward is 1 (meaning the affordance info is not being used)
-        if self._config['aff_type'] is None:
+        if self._config['aff_type'] is None:         # if 'aff_type' is None, reward is 1 (meaning the affordance info is not being used)
             return 1.0, True
 
         # Retreive the affordance centers and reaching positions
         aff_centers = self._get_aff_centers(info)
-        reach_pos = self._get_reach_pos(info)
+        reach_pos , _ = self._get_reach_pos(info)
 
-        # If affordance centers is None (such as the case of Atomic and GripperSkill), 
-        # then return 1.0 reward and success is True
-        if aff_centers is None:
+        if aff_centers is None:        # If affordance centers is None (such as the case of Atomic and GripperSkill), then return 1.0 reward and success is True
             return 1.0, True
         # SIDE NOTE: I think the reason atomic is spammed early on is because you get a reward for just using it
 
-        # If there are no affordance centers (object keypoints), 
-        # then 0 reward and success is False
-        if len(aff_centers) == 0:
+        if len(aff_centers) == 0:         # If there are no affordance centers (object keypoints), then 0 reward and success is False
+#            if info['f_excess_max_force'] and self._config['use_force_aff']: # amin
+#                return 0.2, False
+#            else:
             return 0.0, False
 
         th = self._config['aff_threshold'] # retreive pre-defined affordance threshold
         within_th = (np.abs(aff_centers - reach_pos) <= th) # check if the executed skill is within range of the threshold 
         aff_success = np.any(np.all(within_th, axis=1)) # return that it is successful if it is in range
 
-        # If the affordance type is 'dense', then the affordance reward increases the 
-        # closer it is to the keypoint IF IT IS SOMEWHERE OUTSIDE THE THRESHOLD AREA
-        if self._config['aff_type'] == 'dense':
+        if self._config['aff_type'] == 'dense': # If the affordance type is 'dense', then the affordance reward increases the closer it is to the keypoint IF IT IS SOMEWHERE OUTSIDE THE THRESHOLD AREA
             if aff_success:
                 aff_reward = 1.0
             else:
@@ -155,6 +154,17 @@ class BaseSkill:
                 aff_reward = 1.0 - np.tanh(self._config['aff_tanh_scaling'] * min_dist)
         else:
             aff_reward = float(aff_success)
+
+        # I added this part:
+        aff_reward_pos = aff_reward
+        if self._config['use_force_aff']:
+            force_weight = 0.2
+            pos_weight = 1 - force_weight            
+
+            stiffness_magnitude = np.linalg.norm(np.array(info['stiffness_force']))
+            scaled_stiffness_magnitude = stiffness_magnitude / np.sqrt(3)
+            stiffness_aff = 1 - scaled_stiffness_magnitude
+            aff_reward = pos_weight*aff_reward_pos + force_weight*stiffness_aff
 
         return aff_reward, aff_success
 
@@ -184,21 +194,25 @@ class AtomicSkill(BaseSkill):
         return base_param_dim
 
     def get_pos_ac(self, info):
-        #print('atomic used')
         params = self._params
 #        print('atomic params',params)
         is_delta = True
         rc_dim = self._config['robot_controller_dim']
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
-            #print('position')
             pos = params[:3].copy()
-            impedance_pos = [-999,-999,-999]
-            return pos, is_delta, impedance_pos
+            impedance_pos = 999
+        elif rc_dim==6 or rc_dim==7:
+            pos = params[3:6].copy()
+            impedance_pos = params[:3].copy()
         else:
-            #print('impedance')
             pos = params[6:9].copy()
             impedance_pos = params[:3].copy()
-            return pos, is_delta, impedance_pos
+
+        # Discretizes impedance to 3 values: -1, 0, 1
+        if self._config['discrete_impedance']:
+            impedance_pos = np.round(impedance_pos)
+
+        return pos, is_delta, impedance_pos
 
     def get_ori_ac(self, info):
         ori, impedance_ori = super().get_ori_ac(info)
@@ -221,7 +235,7 @@ class AtomicSkill(BaseSkill):
         return None
 
     def _get_reach_pos(self, info):
-        return info['cur_ee_pos']
+        return info['cur_ee_pos'], 999
 
 class GripperSkill(BaseSkill):
     def __init__(
@@ -248,25 +262,23 @@ class GripperSkill(BaseSkill):
         self._num_steps_steps += 1
 
     def get_pos_ac(self, info):
-        #print('gripper used')
         pos = np.zeros(3)
         is_delta = True
-        impedance_pos = [-999,-999,-999]
+        params = self._params.copy()
+        impedance_pos = [-1,-1,-1] # might cause problems, probably not
         return pos, is_delta, impedance_pos
 
     def get_ori_ac(self, info):
         rc_dim = self._config['robot_controller_dim']
 
-        if rc_dim==4:
-            ori = np.zeros(rc_dim - 3)
-        elif rc_dim==3 or rc_dim==9: # representing OSC_POSITION and OSC_POSITION_YAW
-            ori = []
-        elif rc_dim==10: #representing OSC_POSITION_YAW with variable_kp
+        if rc_dim==3 or rc_dim==6 or rc_dim==9: # representing OSC_POSITION with fixed/variable_kp_mod/variable_kp
+            ori = np.zeros(0)
+        elif rc_dim==4 or rc_dim==7 or rc_dim==10:  #representing OSC_POSITION_YAW with fixed/variable_kp_mod/variable_kp
             ori = np.zeros(1)
 
-#        ori[:] = 0.0 # i removed this
+        ori[:] = 0.0
         is_delta = True
-        impedance_ori = [-1001,-1001,-1001] # I Belive we MUST change this when we make gripper use impedance params
+        impedance_ori = [0,0,0]
         return ori, is_delta, impedance_ori
 
     def get_gripper_ac(self, info):
@@ -288,7 +300,7 @@ class GripperSkill(BaseSkill):
         return None
 
     def _get_reach_pos(self, info):
-        return info['cur_ee_pos']
+        return info['cur_ee_pos'], 999
 
 class ReachOSCSkill(BaseSkill):
     def __init__(
@@ -319,7 +331,6 @@ class ReachOSCSkill(BaseSkill):
         super().reset(params, config_update, info)
 
     def get_pos_ac(self, info):
-        #print('reach_osc used')
         goal_pos, impedance_pos = self._get_reach_pos(info)
         is_delta = False
         return goal_pos, is_delta, impedance_pos
@@ -353,28 +364,49 @@ class ReachOSCSkill(BaseSkill):
                 delta_pos = np.clip(delta_pos, -1, 1)
                 delta_pos *= self._config['delta_xyz_scale']
                 pos = self._start_pos + delta_pos
-                impedance_pos = [-999,-999,-999]
+                impedance_pos = 999
                 return pos, impedance_pos
 
-            else:
-                delta_pos = params[6:9].copy()
-                impedance_pos = params[:3].copy()
+            elif rc_dim==6 or rc_dim==7:
+                delta_pos = params[3:6].copy()
                 delta_pos = np.clip(delta_pos, -1, 1)
                 delta_pos *= self._config['delta_xyz_scale']
                 pos = self._start_pos + delta_pos
-                return pos, impedance_pos
+                impedance_pos = params[:3].copy()
+
+            else:
+                delta_pos = params[6:9].copy()
+                delta_pos = np.clip(delta_pos, -1, 1)
+                delta_pos *= self._config['delta_xyz_scale']
+                pos = self._start_pos + delta_pos
+                impedance_pos = params[:3].copy()
+
+            # Discretizes impedance to 3 values: -1, 0, 1
+            if self._config['discrete_impedance']:
+                impedance_pos = np.round(impedance_pos)
+
+            return pos, impedance_pos
 
         else:
             if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
                 pos = self._get_unnormalized_pos(
                     params[:3], self._config['global_xyz_bounds'])
-                impedance_pos = [-999,-999,-999]
+                impedance_pos = 999
                 return pos, impedance_pos
+            if rc_dim==6 or rc_dim==7:
+                pos = self._get_unnormalized_pos(
+                    params[3:6], self._config['global_xyz_bounds'])
+                impedance_pos = params[:3].copy()
             else:
                 pos = self._get_unnormalized_pos(
                     params[6:9], self._config['global_xyz_bounds'])
                 impedance_pos = params[:3].copy()
-                return pos, impedance_pos
+
+            # Discretizes impedance to 3 values: -1, 0, 1
+            if self._config['discrete_impedance']:
+                impedance_pos = np.round(impedance_pos)
+
+            return pos, impedance_pos
 
     def is_success(self, info):
         pos, delta, impedance_pos = self.get_pos_ac(info)
@@ -435,7 +467,6 @@ class ReachSkill(BaseSkill):
         assert self._state in ReachSkill.STATES
 
     def get_pos_ac(self, info):
-        #print('reach used')
         cur_pos = info['cur_ee_pos']
         goal_pos, impedance_pos = self._get_reach_pos(info)
 
@@ -477,18 +508,26 @@ class ReachSkill(BaseSkill):
 
     def _get_reach_pos(self, info):
         params = self._params
-        #print('reach params',params)
         rc_dim = self._config['robot_controller_dim']
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
             pos = self._get_unnormalized_pos(
                 params[:3], self._config['global_xyz_bounds'])
-            impedance_pos = [-999,-999,-999]
+            impedance_pos = 999
             return pos, impedance_pos
+        elif rc_dim==6 or rc_dim==7:
+            pos = self._get_unnormalized_pos(
+                params[3:6], self._config['global_xyz_bounds'])
+            impedance_pos = params[:3]
         else:
             pos = self._get_unnormalized_pos(
                 params[6:9], self._config['global_xyz_bounds'])
             impedance_pos = params[:3]
-            return pos, impedance_pos
+
+        # Discretizes impedance to 3 values: -1, 0, 1
+        if self._config['discrete_impedance']:
+            impedance_pos = np.round(impedance_pos)
+
+        return pos, impedance_pos
 
     def is_success(self, info):
         return self._state == 'REACHED'
@@ -558,7 +597,6 @@ class GraspSkill(BaseSkill):
         assert self._state in GraspSkill.STATES
 
     def get_pos_ac(self, info):
-        #print('grasp used')
         cur_pos = info['cur_ee_pos']
         goal_pos, impedance_pos = self._get_reach_pos(info)
 
@@ -603,16 +641,23 @@ class GraspSkill(BaseSkill):
 
     def _get_reach_pos(self, info):
         params = self._params
-        #print('grasp params',params)
         rc_dim = self._config['robot_controller_dim']
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
             pos = self._get_unnormalized_pos(
                 params[:3], self._config['global_xyz_bounds'])
-            impedance_pos = [-999,-999,-999]
+            impedance_pos = 999
+        elif rc_dim==6 or rc_dim==7:
+            pos = self._get_unnormalized_pos(
+                params[3:6], self._config['global_xyz_bounds'])
+            impedance_pos = params[:3].copy()
         else:
             pos = self._get_unnormalized_pos(
                 params[6:9], self._config['global_xyz_bounds'])
             impedance_pos = params[:3].copy()
+
+        # Discretizes impedance to 3 values: -1, 0, 1
+        if self._config['discrete_impedance']:
+            impedance_pos = np.round(impedance_pos)
 
         return pos, impedance_pos
 
@@ -675,7 +720,6 @@ class PushSkill(BaseSkill):
         assert self._state in PushSkill.STATES
 
     def get_pos_ac(self, info):
-        #print('push used')
         cur_pos = info['cur_ee_pos']
         src_pos, impedance_pos_reach = self._get_reach_pos(info)
         target_pos, impedance_pos_push = self._get_push_pos(info)
@@ -724,20 +768,29 @@ class PushSkill(BaseSkill):
 
     def _get_reach_pos(self, info):
         params = self._params
-        #print('push params:',params)
         rc_dim = self._config['robot_controller_dim']
         if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
             pos = self._get_unnormalized_pos(
                 params[:3], self._config['global_xyz_bounds'])
             pos = pos.copy()
-            impedance_pos = [-999,-999,-999]
+            impedance_pos = 999
             return pos, impedance_pos
+        elif rc_dim==6 or rc_dim==7:
+            pos = self._get_unnormalized_pos(
+                params[3:6], self._config['global_xyz_bounds'])
+            pos = pos.copy()
+            impedance_pos = params[:3].copy()
         else:
             pos = self._get_unnormalized_pos(
                 params[6:9], self._config['global_xyz_bounds'])
             pos = pos.copy()
             impedance_pos = params[:3].copy()
-            return pos, impedance_pos
+
+        # Discretizes impedance to 3 values: -1, 0, 1
+        if self._config['discrete_impedance']:
+            impedance_pos = np.round(impedance_pos)
+
+        return pos, impedance_pos
 
     def _get_push_pos(self, info):
         params = self._params
@@ -745,7 +798,6 @@ class PushSkill(BaseSkill):
         src_pos, impedance_pos = self._get_reach_pos(info)
         pos = src_pos.copy()
 
-#        print('params',params)
 #        rc_dim = self._config['robot_controller_dim']
 #        if rc_dim==3 or rc_dim==9: # representing OSC_POSITION
         delta_pos = params[-3:].copy() # INVESTIGATE MAYBE? #if wiping gets worse, then just make this [-4:-1]

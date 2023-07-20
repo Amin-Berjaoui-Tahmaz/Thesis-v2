@@ -14,6 +14,8 @@ from robosuite.controllers.skill_controller import SkillController
 
 
 class RobotEnv(MujocoEnv):
+
+    counter=0 #amin
     """
     Initializes a robot environment in Mujoco.
 
@@ -363,6 +365,7 @@ class RobotEnv(MujocoEnv):
         while True:
             action_ll = sc.step()
             #print('action_ll',action_ll)
+            RobotEnv.counter+=1 #amin
             _, reward, done, info = super().step(action_ll, **kwargs)
             reward_sum += reward
             if image_obs_in_info:
@@ -371,6 +374,7 @@ class RobotEnv(MujocoEnv):
             if sc.done():
                 break
 
+        info['counter'] = RobotEnv.counter #amin
         info['reward_actions'] = reward_sum
         info['reward_skills'] = reward
 
@@ -409,6 +413,7 @@ class RobotEnv(MujocoEnv):
         """
         # Verify that the action is the correct dimension
         robot_dim = sum([robot.action_dim for robot in self.robots])
+        #print('action',action)
         assert len(action) == robot_dim, \
             "environment got invalid action dimension -- expected {}, got {}".format(
                 robot_dim, len(action))

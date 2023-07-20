@@ -1,3 +1,5 @@
+## MODIFIED THIS CODE TO WORK WITH CAMERA
+
 from collections import OrderedDict
 import numpy as np
 
@@ -7,6 +9,7 @@ from robosuite.models.arenas import WipeArena
 from robosuite.models.tasks import ManipulationTask
 import multiprocessing
 
+import cv2
 
 # Default Wipe environment configuration
 DEFAULT_WIPE_CONFIG = {
@@ -17,6 +20,7 @@ DEFAULT_WIPE_CONFIG = {
     "task_complete_reward": 1.5,
     "success_th": 1.00,
     "excess_force_penalty_mul": 0.01,
+    "energy_penalty_mul": 0.003, #amin
 
     # settings for table top
     "table_full_size": [0.5, 0.8, 0.05],            # Size of tabletop
@@ -39,7 +43,9 @@ DEFAULT_WIPE_CONFIG = {
     "use_robot_obs": True,                          # if we use robot observations (proprioception) as input to the policy
     "use_contact_obs": True,                        # if we use a binary observation for whether robot is in contact or not
     "early_terminations": False,                    # Whether we allow for early terminations or not
-    "use_condensed_obj_obs": True,                  # Whether to use condensed object observation representation (only applicable if obj obs is active)
+    "use_condensed_obj_obs": False,  #amin                 # Whether to use condensed object observation representation (only applicable if obj obs is active)
+    
+    "camera_depth":False, #amin
 }
 
 
@@ -193,6 +199,7 @@ class Wipe(SingleArmEnv):
         self.reward_shaping = reward_shaping
         self.wipe_contact_reward = self.task_config['wipe_contact_reward']
         self.excess_force_penalty_mul = self.task_config['excess_force_penalty_mul']
+        self.energy_penalty_mul = self.task_config['energy_penalty_mul'] # amin
         self.distance_multiplier = self.task_config['distance_multiplier']
         self.distance_th_multiplier = self.task_config['distance_th_multiplier']
         # Final reward computation
@@ -237,11 +244,15 @@ class Wipe(SingleArmEnv):
         self.wiped_markers = []
         self.collisions = 0
         self.f_excess_total = 0
+        self.force_ee = 0 #amin
+        self.total_js_energy = 0 #amin
+        self.stiffness = np.array([1,1,1])
         self.metadata = []
         self.spec = "spec"
 
         # whether to include and use ground-truth object states
         self.use_object_obs = use_object_obs
+        self.camera_depth = self.task_config['camera_depth']
 
         super().__init__(
             robots=robots,
@@ -463,6 +474,69 @@ class Wipe(SingleArmEnv):
         # Get prefix from robot model to avoid naming clashes for multiple robots
         pf = self.robots[0].robot_model.naming_prefix
 
+        camera_width_vices = 48
+        camera_height_vices = 48
+
+#        self.use_camera_obs = True
+
+        amin_using_cam = True
+        if amin_using_cam:
+            camera_obs = self.sim.render(
+                camera_name='robot0_robotview',
+                width=camera_width_vices,
+                height=camera_height_vices,
+                depth=self.camera_depth,
+            )
+
+            # Convert the image to grayscale
+            gray_camera_obs = cv2.cvtColor(camera_obs, cv2.COLOR_BGR2GRAY)
+
+            # Reshape the grayscale image to a 2D array
+            pixel_values = gray_camera_obs.reshape((-1, 1))
+            pixel_values = np.float32(pixel_values)
+
+            # Define the criteria for K-means algorithm
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+
+            # Set the number of clusters (k value)
+            k = 2
+
+            # Apply K-means clustering
+            _, labels, centers = cv2.kmeans(pixel_values, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+
+            # Flatten the labels array to make it 1D
+            labels = labels.flatten()
+            label_counts = np.bincount(labels)
+
+            # Convert the center values back to uint8
+            center = np.uint8(centers)
+
+            darkest_color_idx = np.argmax(label_counts)
+            darkest_color = center[darkest_color_idx]
+
+            # Create a mask to highlight the foreground object based on the darkest color
+            mask = np.zeros(gray_camera_obs.shape[:2], dtype=np.uint8)
+            reshaped_labels = labels.reshape(gray_camera_obs.shape[:2])
+            mask[reshaped_labels == darkest_color_idx] = 255
+
+            # Create the segmented image
+            segmented_image = center[labels.flatten()]
+            segmented_image = segmented_image.reshape(gray_camera_obs.shape)
+
+            # Determine the maximum pixel value in the raw camera image
+            max_pixel_value = segmented_image.max()
+
+            # Normalize the pixel values to the range [0, 1]
+            normalized_k_means_camera_obs = segmented_image / max_pixel_value
+
+            # cv2.imshow('',normalized_k_means_camera_obs)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+
+            # Store the normalized image in the dictionary
+            di["image"] = normalized_k_means_camera_obs
+
         # Add binary contact observation
         if self.use_contact_obs:
             di[pf + "contact-obs"] = self._has_gripper_contact
@@ -486,20 +560,21 @@ class Wipe(SingleArmEnv):
                     di["gripper_to_wipe_centroid"] = gripper_to_wipe_centroid
                     di["object-state"] = np.concatenate([di["object-state"], di["gripper_to_wipe_centroid"]])
 
-            else:
-                # use explicit representation of wiping objects
-                acc = np.array([])
-                for i, marker in enumerate(self.model.mujoco_arena.markers):
-                    marker_pos = np.array(self.sim.data.body_xpos[self.sim.model.body_name2id(marker.root_body)])
-                    di[f'marker{i}_pos'] = marker_pos
-                    acc = np.concatenate([acc, di[f'marker{i}_pos']])
-                    di[f'marker{i}_wiped'] = [0, 1][marker in self.wiped_markers]
-                    acc = np.concatenate([acc, [di[f'marker{i}_wiped']]])
-                    if self.use_robot_obs:
-                        # also use ego-centric proprioception
-                        di[f'gripper_to_marker{i}'] = gripper_site_pos - marker_pos
-                        acc = np.concatenate([acc, di[f'gripper_to_marker{i}']])
-                di['object-state'] = acc
+            # else:
+            #     print('else')
+            #     # use explicit representation of wiping objects
+            #     acc = np.array([])
+            #     for i, marker in enumerate(self.model.mujoco_arena.markers):
+            #         marker_pos = np.array(self.sim.data.body_xpos[self.sim.model.body_name2id(marker.root_body)])
+            #         di[f'marker{i}_pos'] = marker_pos
+            #         acc = np.concatenate([acc, di[f'marker{i}_pos']])
+            #         di[f'marker{i}_wiped'] = [0, 1][marker in self.wiped_markers]
+            #         acc = np.concatenate([acc, [di[f'marker{i}_wiped']]])
+            #         if self.use_robot_obs:
+            #             # also use ego-centric proprioception
+            #             di[f'gripper_to_marker{i}'] = gripper_site_pos - marker_pos
+            #             acc = np.concatenate([acc, di[f'gripper_to_marker{i}']])
+            #     di['object-state'] = acc
 
         return di
 
@@ -594,15 +669,21 @@ class Wipe(SingleArmEnv):
         # TODO: Need to include this computation somehow in the scaled reward computation
         elif self.reward_shaping and force_ee > self.pressure_threshold and self.sim.data.ncon > 1:
             reward += ((0.001 * force_ee) * self.reward_scale / self.task_complete_reward)
-            ### WE DON'T NEED THIS PART ###
-            # if self.sim.data.ncon > 50:
-            #     reward += 10. * self.wipe_contact_reward
+
+        self.total_js_energy = np.sum(self.robots[0].js_energy) # amin
+        reward -= ((self.energy_penalty_mul*self.total_js_energy) * self.reward_scale / self.task_complete_reward) # amin
+
+        self.force_ee = force_ee
+        self.stiffness = action[:3]
 
         info['success'] = self._check_success()
         info['percent_wiped'] = len(self.wiped_markers) / self.num_markers
         info['f_excess_total'] = self.f_excess_total
         info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
         info['f_excess_mean'] = self._f_excess_mean
+        info['force_ee'] = force_ee # amin
+        info['energy_used'] = self.total_js_energy #amin
+        info['stiffness'] = self.stiffness
 
         # allow episode to finish early if allowed
         if self.early_terminations:
@@ -614,14 +695,26 @@ class Wipe(SingleArmEnv):
         _, wipe_centroid, _ = self._get_wipe_information
 
         pos_info = {}
+        force_info = {} # I added this and everything related to force in this function
 
         pos_info['grasp'] = [] # grasp target positions
         pos_info['push'] = [wipe_centroid] # push target positions
         pos_info['reach'] = [wipe_centroid] # reach target positions
 
+        force_info['f_excess_total'] = self.f_excess_total
+        force_info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
+        force_info['f_excess_mean'] = self._f_excess_mean
+        force_info['force_ee_max'] = self._force_ee_max
+        force_info['force_ee'] = self.force_ee # amin
+        force_info['energy_used'] = self.total_js_energy #amin
+        force_info['stiffness'] = self.stiffness
+
         info = {}
         for k in pos_info:
             info[k + '_pos'] = pos_info[k]
+
+        for f in force_info:
+            info[f + '_force'] = force_info[f]
 
         return info
 

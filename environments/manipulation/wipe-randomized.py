@@ -17,13 +17,14 @@ DEFAULT_WIPE_CONFIG = {
     "task_complete_reward": 1.5,
     "success_th": 1.00,
     "excess_force_penalty_mul": 0.01,
+    "energy_penalty_mul": 0.003, #amin
 
     # settings for table top
     "table_full_size": [0.5, 0.8, 0.05],            # Size of tabletop
     "table_friction": [0.03, 0.005, 0.0001],        # Friction parameters for the table
-    "table_friction_std": 0,                        # Standard deviation to sample different friction parameters for the table each episode
+    "table_friction_std": [0.02, 0.003, 0.0001], #amin                       # Standard deviation to sample different friction parameters for the table each episode
     "table_height": 0.0,                            # Additional height of the table over the default location
-    "table_height_std": 0.0,                        # Standard deviation to sample different heigths of the table each episode
+    "table_height_std": 0.1,  #amin                       # Standard deviation to sample different heigths of the table each episode
     "line_width": 0.04,                             # Width of the line to wipe (diameter of the pegs)
     "two_clusters": False,                          # if the dirt to wipe is one continuous line or two
     "coverage_factor": 0.6,                         # how much of the table surface we cover
@@ -32,7 +33,7 @@ DEFAULT_WIPE_CONFIG = {
     # settings for thresholds
     "contact_threshold": 1.0,                       # Minimum eef force to qualify as contact [N]
     "pressure_threshold": 0.5,                      # force threshold (N) to overcome to get increased contact wiping reward
-    "pressure_threshold_max": 60.,                  # maximum force allowed (N) # CHANGED FROM 60
+    "pressure_threshold_max": 60.,                  # maximum force allowed (N)
 
     # misc settings
     "print_results": False,                         # Whether to print results or not
@@ -43,7 +44,7 @@ DEFAULT_WIPE_CONFIG = {
 }
 
 
-class WipeMod(SingleArmEnv):
+class Wipe(SingleArmEnv):
     """
     This class corresponds to the Wiping task for a single robot arm
 
@@ -188,11 +189,13 @@ class WipeMod(SingleArmEnv):
 
         # Set task-specific parameters
 
-        # settings for the reward
+        # settings for the reward        print('self.table_friction',self.table_friction)
+
         self.reward_scale = reward_scale
         self.reward_shaping = reward_shaping
         self.wipe_contact_reward = self.task_config['wipe_contact_reward']
         self.excess_force_penalty_mul = self.task_config['excess_force_penalty_mul']
+        self.energy_penalty_mul = self.task_config['energy_penalty_mul'] # amin
         self.distance_multiplier = self.task_config['distance_multiplier']
         self.distance_th_multiplier = self.task_config['distance_th_multiplier']
         # Final reward computation
@@ -210,12 +213,15 @@ class WipeMod(SingleArmEnv):
         self.table_height_std = self.task_config['table_height_std']
         delta_height = min(0, np.random.normal(self.table_height, self.table_height_std))  # sample variation in height
         self.table_offset = np.array(table_offset) + np.array((0, 0, delta_height))
+        # print('table_height',self.table_height)
+        # print('table_offset',self.table_offset)
         self.table_friction = self.task_config['table_friction']
         self.table_friction_std = self.task_config['table_friction_std']
-        self.line_width = self.task_config['line_width']
+        # print('self.table_friction',self.table_friction)
+        self.line_width = self.task_config['line_width'] + np.random.normal(0,0.01)
         self.two_clusters = self.task_config['two_clusters']
-        self.coverage_factor = self.task_config['coverage_factor']
-        self.num_markers = self.task_config['num_markers']
+        self.coverage_factor = self.task_config['coverage_factor'] - np.random.uniform(0,0.25)
+        self.num_markers = self.task_config['num_markers'] - int(np.random.uniform(0,75))
 
         # settings for thresholds
         self.contact_threshold = self.task_config['contact_threshold']
@@ -237,6 +243,9 @@ class WipeMod(SingleArmEnv):
         self.wiped_markers = []
         self.collisions = 0
         self.f_excess_total = 0
+        self.force_ee = 0 #amin
+        self.total_js_energy = 0 #amin
+        self.stiffness = np.array([1,1,1])
         self.metadata = []
         self.spec = "spec"
 
@@ -574,7 +583,6 @@ class WipeMod(SingleArmEnv):
             self.ee_force_bias = self.robots[0].ee_force
             self.ee_torque_bias = self.robots[0].ee_torque
 
-        # Calculates force magnitude
         total_force_ee = np.linalg.norm(np.array(self.robots[0].recent_ee_forcetorques.current[:3]))
         self._force_ee_max = max(self._force_ee_max, total_force_ee)
         self._force_ee_mean = (self._force_ee_mean * self._num_steps + total_force_ee) / (self._num_steps + 1)
@@ -595,19 +603,21 @@ class WipeMod(SingleArmEnv):
         # TODO: Need to include this computation somehow in the scaled reward computation
         elif self.reward_shaping and force_ee > self.pressure_threshold and self.sim.data.ncon > 1:
             reward += ((0.001 * force_ee) * self.reward_scale / self.task_complete_reward)
-            ### WE DON'T NEED THIS PART ###
-            # if self.sim.data.ncon > 50:
-            #     reward += 10. * self.wipe_contact_reward
+
+        self.total_js_energy = np.sum(self.robots[0].js_energy) # amin
+        reward -= ((self.energy_penalty_mul*self.total_js_energy) * self.reward_scale / self.task_complete_reward) # amin
+
+        self.force_ee = force_ee
+        self.stiffness = action[:3]
 
         info['success'] = self._check_success()
         info['percent_wiped'] = len(self.wiped_markers) / self.num_markers
         info['f_excess_total'] = self.f_excess_total
         info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
         info['f_excess_mean'] = self._f_excess_mean
-        info['force_ee'] = force_ee
-
-        # self.impedance_pos_curr = action[:3]
-        # self.impedance_ori_curr = action[3:6]
+        info['force_ee'] = force_ee # amin
+        info['energy_used'] = self.total_js_energy #amin
+        info['stiffness'] = self.stiffness
 
         # allow episode to finish early if allowed
         if self.early_terminations:
@@ -620,7 +630,6 @@ class WipeMod(SingleArmEnv):
 
         pos_info = {}
         force_info = {} # I added this and everything related to force in this function
-        impedance_info = {}
 
         pos_info['grasp'] = [] # grasp target positions
         pos_info['push'] = [wipe_centroid] # push target positions
@@ -630,9 +639,9 @@ class WipeMod(SingleArmEnv):
         force_info['f_excess_max'] = (self._force_ee_max > self.pressure_threshold_max)
         force_info['f_excess_mean'] = self._f_excess_mean
         force_info['force_ee_max'] = self._force_ee_max
-
-        # impedance_info['impedance_pos_curr'] = self.impedance_pos_curr
-        # impedance_info['impedance_ori_curr'] = self.impedance_ori_curr
+        force_info['force_ee'] = self.force_ee # amin
+        force_info['energy_used'] = self.total_js_energy #amin
+        force_info['stiffness'] = self.stiffness
 
         info = {}
         for k in pos_info:
@@ -640,9 +649,6 @@ class WipeMod(SingleArmEnv):
 
         for f in force_info:
             info[f + '_force'] = force_info[f]
-
-        # for k in impedance_info:
-        #     info[k + '_impedance'] = impedance_info[k]
 
         return info
 

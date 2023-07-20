@@ -107,6 +107,8 @@ class SkillController:
             for skill_name, skill in self._skills.items():
                 dim = skill.get_param_dim(base_param_dim)
                 self._param_dims[skill_name] = dim
+#                print('base_param_dim',base_param_dim) # it is now 9, need to make it 6
+#                print('dim',dim)
         return np.max(list(self._param_dims.values()))
 
     def get_skill_names(self):
@@ -136,7 +138,6 @@ class SkillController:
         skill = self._cur_skill
         skill.update_state(info)
 
-#        print('Skill:',skill)
         pos, pos_is_delta, impedance_pos = skill.get_pos_ac(info)
         ori, ori_is_delta, impedance_ori = skill.get_ori_ac(info)
         action_g = skill.get_gripper_ac(info)
@@ -145,15 +146,12 @@ class SkillController:
         self._ori_is_delta = ori_is_delta
         self._num_ac_calls += 1
 
-#        print('ori',ori)
-#        print('impedance_ori',impedance_ori)
-
         rc_dim = self._env.robots[0].controller.control_dim
-        if rc_dim==3 or rc_dim==4: # representing OSC_POSITION and OSC_POSITION_YAW
+        if rc_dim==3 or rc_dim==4:                                      # representing OSC_POSITION and OSC_POSITION_YAW
             return np.concatenate([pos, ori, action_g])
-        else:
-#            impedance_pos = [150,150,150]
-            impedance_ori = [150,150,impedance_ori[2]]
+        elif rc_dim==6 or rc_dim==7:                                    # representing osc.py with 3 translational stiffness values
+            return np.concatenate([impedance_pos, pos, ori, action_g])
+        else:                                                           # representing osc.py with 3 translational stiffness values and 3 orientational stiffness values
             return np.concatenate([impedance_pos, impedance_ori, pos, ori, action_g])
 
     def _get_info(self):
