@@ -698,7 +698,7 @@ def run_experiment(
                 image=singularity_image,
                 gpu=use_gpu,
                 time_in_mins=time_in_mins,
-                skip_wait=skip_wait,
+#                skip_wait=skip_wait,
                 pre_cmd=conf.SINGULARITY_PRE_CMDS,
                 **kwargs
             )

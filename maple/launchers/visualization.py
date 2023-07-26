@@ -76,21 +76,17 @@ def dump_video(
 
             ##########
             curr_action = rollout_actions[i][j]
-            # print('curr_action.shape',curr_action.shape)
-#            print('curr_action',curr_action)
-#            print('skill_name_map',skill_name_map.keys())
             skill_names, _ = sc.get_skill_names_and_colors()
             print_impedance = True
-#            if curr_action.shape[0]>num_skills+9:
-#                print('it is')
             if print_impedance:
-                kp = curr_action[len(skill_names):len(skill_names)+6]
-                kp_min = np.full(6,25)
-                kp_max = np.full(6,200)
-                norm_min = np.full(6,-1)
-                norm_max = np.full(6,1)
+                dim = 3 # dim = 3 if variable_kp_mod else 6 (for variable_kp)
+                kp = curr_action[len(skill_names):len(skill_names)+dim] #if variable_kp
+                kp_min = np.full(dim,-1)
+                kp_max = np.full(dim,1)
+                norm_min = np.full(dim,0)
+                norm_max = np.full(dim,1)
                 kp = ((kp - norm_min) / (norm_max - norm_min)) * (kp_max - kp_min) + kp_min
-                ac_str = skill_name + str(np.round(kp[:3])) # i added this                
+                ac_str = skill_name + str(np.round(kp[:3],2))
             ###############
 
             success = successes[i][max(j-1, 0)]
@@ -185,6 +181,9 @@ def dump_skillmap(
     horizon = np.max([len(rollout) for rollout in rollout_actions])
     horizon = math.ceil(horizon / 25) * 25 # round to next increment of 25
     skill_ids = -1 * np.ones((num_rollouts, horizon))
+    impedance_skill = np.zeros((num_rollouts, horizon))
+    min_impedance_value = -1
+    max_impedance_value = 1 # change when controller config changes (used to be betweeen 0 and 300 but i made it -1 to 1 for consistency)
 
     sc = env.env.skill_controller
     skill_names, colors = sc.get_skill_names_and_colors()
@@ -197,11 +196,9 @@ def dump_skillmap(
             ac = rollout[j]
             skill_id = sc.get_skill_id_from_action(ac)
             skill_ids[i][j] = skill_id
+            impedance_skill[i][j] = ((ac[num_skills+2] - min_impedance_value) / (max_impedance_value - min_impedance_value)) * max_impedance_value
             if j-1 >= 0 and successes[i][j-1]:
                 skill_ids[i][j] += num_skills
-        print('ac',ac)
-        print('skill_ids',skill_ids)
-        print('++++++++++++++++++++++++++')
 
     colors.insert(0, "white")
     colors_rgba = []
@@ -234,6 +231,24 @@ def dump_skillmap(
     )
     plt.savefig(filename, bbox_inches='tight')
 
+
+    plt.figure( figsize = (15 * math.ceil(horizon / 100) ,3))
+    plt.pcolormesh(impedance_skill, edgecolors='w', linewidth=1, vmin=-1, vmax=1, cmap=plt.cm.get_cmap('bwr'))
+    plt.yticks([])
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    cax, _ = matplotlib.colorbar.make_axes(plt.gca(), location = 'right')
+    cbar = matplotlib.colorbar.ColorbarBase(
+        cax,
+        cmap = plt.cm.get_cmap('bwr'),  # Choose a colormap
+#        ticks=np.linspace(0, 300, 5),
+#        boundaries=np.linspace(0, 300, 301),
+    )
+    filename = osp.join(
+        logdir,
+        'cmap_{mode}_{epoch}_impedance.png'.format(mode=mode, epoch=epoch)
+    )
+    plt.savefig(filename, bbox_inches='tight')
 
 def get_image(obs, imsize=84, pad_length=1, pad_color=255):
     if len(obs.shape) == 1:

@@ -18,13 +18,13 @@ from maple.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
 import numpy as np
 import torch
 
-from robosuite.environments.base import register_env # for registering modified env
-from robosuite.environments.manipulation.wipe_modified import WipeMod # for registering modified env
+#from robosuite.environments.base import register_env # for registering modified env
+#from robosuite_task_zoo.environments.manipulation import HammerPlaceEnv
 
 def experiment(variant):
     def make_env(mode):
 
-        register_env(WipeMod) # register env
+#        register_env(HammerPlaceEnv) # register env
 
         assert mode in ['expl', 'eval']
         torch.set_num_threads(1)
@@ -195,7 +195,6 @@ def experiment(variant):
     if 'ckpt_path' in variant:
         ckpt_update_func = get_ckpt_update_func(variant)
         algorithm.pre_epoch_funcs.insert(0, ckpt_update_func)
-
 
     algorithm.to(ptu.device)
     algorithm.train(start_epoch=variant.get('ckpt_epoch', 0))
