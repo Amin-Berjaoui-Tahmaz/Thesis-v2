@@ -22,9 +22,9 @@ DEFAULT_WIPE_CONFIG = {
     # settings for table top
     "table_full_size": [0.5, 0.8, 0.05],            # Size of tabletop
     "table_friction": [0.03, 0.005, 0.0001],        # Friction parameters for the table
-    "table_friction_std": 0,                        # Standard deviation to sample different friction parameters for the table each episode
-    "table_height": 0.0,                            # Additional height of the table over the default location
-    "table_height_std": 0.0,                        # Standard deviation to sample different heigths of the table each episode
+    "table_friction_std": [0.02, 0.003, 0.0001], #amin                       # Standard deviation to sample different friction parameters for the table each episode
+    "table_height": 1,                            # Additional height of the table over the default location
+    "table_height_std": 0.1,  #amin                       # Standard deviation to sample different heigths of the table each episode
     "line_width": 0.04,                             # Width of the line to wipe (diameter of the pegs)
     "two_clusters": False,                          # if the dirt to wipe is one continuous line or two
     "coverage_factor": 0.6,                         # how much of the table surface we cover
@@ -33,7 +33,7 @@ DEFAULT_WIPE_CONFIG = {
     # settings for thresholds
     "contact_threshold": 1.0,                       # Minimum eef force to qualify as contact [N]
     "pressure_threshold": 0.5,                      # force threshold (N) to overcome to get increased contact wiping reward
-    "pressure_threshold_max": 30.,  #was 60N                # maximum force allowed (N)
+    "pressure_threshold_max": 60.,                  # maximum force allowed (N)
 
     # misc settings
     "print_results": False,                         # Whether to print results or not
@@ -189,7 +189,8 @@ class Wipe(SingleArmEnv):
 
         # Set task-specific parameters
 
-        # settings for the reward
+        # settings for the reward        print('self.table_friction',self.table_friction)
+
         self.reward_scale = reward_scale
         self.reward_shaping = reward_shaping
         self.wipe_contact_reward = self.task_config['wipe_contact_reward']
@@ -212,12 +213,15 @@ class Wipe(SingleArmEnv):
         self.table_height_std = self.task_config['table_height_std']
         delta_height = min(0, np.random.normal(self.table_height, self.table_height_std))  # sample variation in height
         self.table_offset = np.array(table_offset) + np.array((0, 0, delta_height))
+        # print('table_height',self.table_height)
+        # print('table_offset',self.table_offset)
         self.table_friction = self.task_config['table_friction']
         self.table_friction_std = self.task_config['table_friction_std']
-        self.line_width = self.task_config['line_width']
+        # print('self.table_friction',self.table_friction)
+        self.line_width = self.task_config['line_width'] + np.random.normal(0,0.01)
         self.two_clusters = self.task_config['two_clusters']
-        self.coverage_factor = self.task_config['coverage_factor']
-        self.num_markers = self.task_config['num_markers']
+        self.coverage_factor = self.task_config['coverage_factor'] - np.random.uniform(0,0.25)
+        self.num_markers = self.task_config['num_markers'] - int(np.random.uniform(0,75))
 
         # settings for thresholds
         self.contact_threshold = self.task_config['contact_threshold']
@@ -483,9 +487,6 @@ class Wipe(SingleArmEnv):
                 di["proportion_wiped"] = len(self.wiped_markers) / self.num_markers
                 di["wipe_radius"] = wipe_radius
                 di["wipe_centroid"] = wipe_centroid
-                # print('wipe_centroid',di["wipe_centroid"])
-                # print('wipe_radius', di["wipe_radius"])
-                # print('##################')
                 di["object-state"] = np.concatenate([
                     [di["proportion_wiped"]], [di["wipe_radius"]], di["wipe_centroid"],
                 ])
@@ -604,11 +605,10 @@ class Wipe(SingleArmEnv):
             reward += ((0.001 * force_ee) * self.reward_scale / self.task_complete_reward)
 
         self.total_js_energy = np.sum(self.robots[0].js_energy) # amin
-        # reward -= ((self.energy_penalty_mul*self.total_js_energy) * self.reward_scale / self.task_complete_reward) # amin
+        reward -= ((self.energy_penalty_mul*self.total_js_energy) * self.reward_scale / self.task_complete_reward) # amin
 
         self.force_ee = force_ee
         self.stiffness = action[:3]
-        self.force_info = np.array(self.robots[0].recent_ee_forcetorques.current[:3])
 
         info['success'] = self._check_success()
         info['percent_wiped'] = len(self.wiped_markers) / self.num_markers
@@ -618,12 +618,6 @@ class Wipe(SingleArmEnv):
         info['force_ee'] = force_ee # amin
         info['energy_used'] = self.total_js_energy #amin
         info['stiffness'] = self.stiffness
-        info['stiffness_x'] = self.stiffness[0] #amin
-        info['stiffness_y'] = self.stiffness[1] #amin
-        info['stiffness_z'] = self.stiffness[2] #amin
-        info['force_x'] = self.force_info[0] #amin
-        info['force_y'] = self.force_info[1] #amin
-        info['force_z'] = self.force_info[2] #amin
 
         # allow episode to finish early if allowed
         if self.early_terminations:

@@ -366,7 +366,12 @@ class RobotEnv(MujocoEnv):
             action_ll = sc.step()
             #print('action_ll',action_ll)
             RobotEnv.counter+=1 #amin
+#            print('counter',RobotEnv.counter)
             _, reward, done, info = super().step(action_ll, **kwargs)
+
+            # info['counter'] = RobotEnv.counter #amin
+            # print(info['counter'])
+
             reward_sum += reward
             if image_obs_in_info:
                 image_obs.append(self._get_camera_obs()['agentview_image'])
@@ -382,10 +387,11 @@ class RobotEnv(MujocoEnv):
 
         if image_obs_in_info:
             info['image_obs'] = image_obs
-        info['num_ac_calls'] = sc.get_num_ac_calls()
+        info['num_ac_calls'] = sc.get_num_ac_calls() # number of times the loop ran (equal to the commented counter variable)
         info['skill_complete'] = float(sc.is_success())
         info['aff_reward'] = sc.get_aff_reward()
         info['aff_success'] = float(sc.get_aff_success())
+
         info.update(self._get_env_info(action))
 
         return self._get_observation(), reward, done, info
