@@ -7,31 +7,6 @@ import collections
 
 base_variant = dict(
 
-#    ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod_env/06-13-test/06-13-test_2023_06_13_12_49_53_0000--s-95624',
-#    ckpt_epoch = 400,
-
-    # ckpt_path = '/home/amin/Desktop/maple/data/peg_ins/07-08-baseline-continued-2/07-08-baseline-continued-2_2023_07_08_02_15_32_0000--s-37686',
-    # ckpt_epoch = 1470,
-
-    # ckpt_path = '/home/amin/Desktop/maple/data/nut/07-09-testing-pos-orig/07-09-testing-pos-orig_2023_07_09_01_27_51_0000--s-29081',
-    # ckpt_epoch = 700,
-
-    # ckpt_path = '/home/amin/Desktop/maple/data/peg_ins/07-10-baseline-continued-3/07-10-baseline-continued-3_2023_07_10_21_37_10_0000--s-59538',
-    # ckpt_epoch = 1780,
-
-
-#    ckpt_path = '/home/amin/Desktop/maple/data/nut/07-10-testing-pos-pos-orig-2/07-10-testing-pos-pos-orig-2_2023_07_10_21_39_33_0000--s-88805',
-#    ckpt_epoch = 940,
-
-#    ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod_env/06-13-test/06-13-test_2023_06_13_12_49_53_0000--s-95624',
-#    ckpt_epoch = 50,
-
-#    ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod_env/07-13-force-aff-scratch/07-13-force-aff-scratch_2023_07_13_19_21_16_0000--s-91333',
-#    ckpt_epoch = 220,
-
-    # ckpt_path = '/home/amin/Desktop/maple/data/wipe_mod_env/07-15-energy-penalty-scratch-fixed/07-15-energy-penalty-scratch-fixed_2023_07_15_01_54_23_0000--s-12657',
-    # ckpt_epoch = 570,
-
     layer_size=256,
     replay_buffer_size=int(1E6),
     rollout_fn_kwargs=dict(
@@ -140,7 +115,7 @@ base_variant = dict(
         ),
     ),
     save_video=True,
-    save_video_period=50,
+    save_video_period=100,
     dump_video_kwargs=dict(
         rows=1,
         columns=6,
@@ -152,11 +127,23 @@ base_variant = dict(
 env_params = dict(
     lift={
         'env_variant.env_type': ['Lift'],
+        'env_variant.env_kwargs.skill_config.skills': [['reach', 'grasp']],
     },
     lift_mod={
         'env_variant.env_type': ['Lift'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
+    },
+    ####################
+    #  ALSO TRY EXPANDING IMPEDANCE RANGE TO SHOW IF ITS ACTUALLY OPTIMIZING IMPEDANCE OR IF 150 IMPEDANCE IS JUST REASONABLE ENOUGH
+    ####################
+    lift_mod_env={
+        'env_variant.env_type': ['Lift'],
+        'env_variant.controller_type': ['OSC_POSITION'],
+        'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
+#        'env_variant.controller_config_update.interpolator': [True],
+        'env_variant.controller_config_update.kp_limits': [[0,400]],
+        'env_variant.env_kwargs.skill_config.base_config.use_force_aff':[True],
+        'env_variant.env_kwargs.skill_config.skills': [['reach', 'grasp']],
     },
     door={
         'env_variant.env_type': ['Door'],
@@ -174,7 +161,6 @@ env_params = dict(
     },
     door_mod={
         'env_variant.env_type': ['Door'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_type': ['OSC_POSITION'],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
         'env_variant.controller_config_update.position_limits': [[[-0.25, -0.25, 0.90], [0.05, 0.05, 1.20]]],
@@ -204,7 +190,6 @@ env_params = dict(
     },
     pnp_mod={
         'env_variant.env_type': ['PickPlaceCan'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
         'env_variant.env_kwargs.bin1_pos': [[0.0, -0.25, 0.8]],
         'env_variant.env_kwargs.bin2_pos': [[0.0, 0.28, 0.8]],
@@ -265,17 +250,15 @@ env_params = dict(
     },
     wipe_mod_env={
         'env_variant.env_type': ['Wipe'],
-#        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel']],#,'robot0_eef_force']],
         'env_variant.obj_keys': [['robot0_contact-obs', 'object-state']],
         'algorithm_kwargs.max_path_length': [300],
         'env_variant.controller_type': ['OSC_POSITION'],
 
         'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
         'env_variant.controller_config_update.kp_limits': [[30,200]],
-
 ###
         'env_variant.env_kwargs.skill_config.base_config.discrete_impedance':[False], # first training was with False discrete impedance, 10.0 reward scaling, and variable_kp_mod
-#        'env_variant.env_kwargs.skill_config.base_config.use_force_aff':[True],
+        'env_variant.env_kwargs.skill_config.base_config.use_force_aff':[True],
 ###
         'env_variant.controller_config_update.position_limits': [[[-0.10, -0.30, 0.75], [0.20, 0.30, 1.00]]],
         'env_variant.env_kwargs.table_offset':[[0.05, 0, 0.8]],
@@ -289,16 +272,15 @@ env_params = dict(
         'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [[0.15, 0.25, 0.03]],
         'env_variant.env_kwargs.skill_config.grasp_config.aff_threshold': [[0.15, 0.25, 0.03]],
         'env_variant.env_kwargs.skill_config.push_config.aff_threshold': [[0.15, 0.25, 0.03]],
-        'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach', 'push']],
+        'env_variant.env_kwargs.skill_config.skills': [['push']],
+        # 'env_variant.env_kwargs.skill_config.skills': [['atomic', 'reach', 'push']],
     },
     stack={
         'env_variant.env_type': ['Stack'],
     },
     stack_mod={
         'env_variant.env_type': ['Stack'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
-        'env_variant.controller_config_update.kp_limits': [[30,200]],
     },
     nut={
         'env_variant.env_type': ['NutAssemblyRound'],
@@ -306,7 +288,6 @@ env_params = dict(
     },
     nut_mod={
         'env_variant.env_type': ['NutAssemblyRound'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
 
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
         'env_variant.controller_config_update.kp_limits': [[30,200]],
@@ -316,32 +297,42 @@ env_params = dict(
     },
     nut_mod_env={
         'env_variant.env_type': ['NutAssemblyRound'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
 
         'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
         'env_variant.controller_config_update.kp_limits': [[30,200]],
         'env_variant.env_kwargs.skill_config.base_config.discrete_impedance':[False],
 
         'env_variant.env_kwargs.skill_config.grasp_config.aff_threshold': [0.06],
+        'env_variant.env_kwargs.skill_config.skills': [['grasp', 'reach']],
 
     },
     cleanup={
         'env_variant.env_type': ['Cleanup'],
+        'env_variant.env_kwargs.skill_config.skills': [['grasp', 'reach', 'open']],
+        # 'env_variant.env_kwargs.skill_config.skills': [['grasp', 'push', 'reach', 'open']], # was without reach before, mb
     },
     cleanup_mod={
         'env_variant.env_type': ['Cleanup'],
-#        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
+    },
+    cleanup_mod_env={
+        'env_variant.env_type': ['Cleanup'],
+        'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
+        'env_variant.env_kwargs.skill_config.base_config.use_force_aff':[True],
+        'env_variant.controller_config_update.kp_limits': [[0,400]],
+#        'env_variant.env_kwargs.skill_config.skills': [['grasp', 'push', 'reach', 'open']],
+#        'env_variant.env_kwargs.skill_config.skills': [['grasp', 'reach', 'open']],
+        'env_variant.env_kwargs.skill_config.skills': [['push']],
     },
     peg_ins={
         'env_variant.env_type': ['PegInHole'],
         'env_variant.controller_config_update.position_limits': [[[-0.30, -0.30, 0.75], [0.15, 0.30, 1.00]]],
         'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [0.06],
         'pamdp_variant.one_hot_factor': [0.375],
+        # 'env_variant.env_kwargs.skill_config.skills': [['grasp', 'reach', 'atomic']],
     },
     peg_ins_mod={
         'env_variant.env_type': ['PegInHole'],
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp'],
         'env_variant.controller_config_update.position_limits': [[[-0.30, -0.30, 0.75], [0.15, 0.30, 1.00]]],
         'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [0.06],
@@ -350,7 +341,6 @@ env_params = dict(
     peg_ins_mod_env={
         'env_variant.env_type': ['PegInHole'],
 
-        'env_variant.robot_keys': [['robot0_eef_pos', 'robot0_eef_quat', 'robot0_gripper_qpos', 'robot0_gripper_qvel','robot0_eef_force']],
         'env_variant.controller_config_update.impedance_mode':['variable_kp_mod'],
         'env_variant.controller_config_update.kp_limits': [[30,200]],
         'env_variant.env_kwargs.skill_config.base_config.discrete_impedance':[False],
@@ -368,8 +358,6 @@ env_params = dict(
         'env_variant.env_kwargs.skill_config.reach_config.aff_threshold': [0.06],
         'pamdp_variant.one_hot_factor': [0.375],
     },
-
-
 )
 
 def process_variant(variant):
@@ -383,7 +371,7 @@ def process_variant(variant):
         variant['algorithm_kwargs']['min_num_steps_before_training'] = steps
         variant['algorithm_kwargs']['num_trains_per_train_loop'] = 50
         variant['replay_buffer_size'] = int(1E3)
-        variant['dump_video_kwargs']['columns'] = 3
+        variant['dump_video_kwargs']['columns'] = 6
 
     if args.no_video:
         variant['save_video'] = False
@@ -437,7 +425,7 @@ if __name__ == "__main__":
             use_gpu=(not args.no_gpu),
             gpu_id=args.gpu_id,
             mode='local',
-#            seed=89532,
+#            seed=89532,#49580 #89532
             num_exps_per_instance=1,
         )
 
