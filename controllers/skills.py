@@ -136,9 +136,6 @@ class BaseSkill:
         # SIDE NOTE: I think the reason atomic is spammed early on is because you get a reward for just using it
 
         if len(aff_centers) == 0:         # If there are no affordance centers (object keypoints), then 0 reward and success is False
-#            if info['f_excess_max_force'] and self._config['use_force_aff']: # amin
-#                return 0.2, False
-#            else:
             return 0.0, False
 
         th = self._config['aff_threshold'] # retreive pre-defined affordance threshold
@@ -156,15 +153,56 @@ class BaseSkill:
             aff_reward = float(aff_success)
 
         # I added this part:
-        aff_reward_pos = aff_reward
         if self._config['use_force_aff']:
-            force_weight = 0.2
-            pos_weight = 1 - force_weight            
+            aff_reward_pos = aff_reward
+    
+            force_weight = 0.25 #1.0
+            pos_weight = 1 - force_weight
 
-            stiffness_magnitude = np.linalg.norm(np.array(info['stiffness_force']))
-            scaled_stiffness_magnitude = stiffness_magnitude / np.sqrt(3)
-            stiffness_aff = 1 - scaled_stiffness_magnitude
-            aff_reward = pos_weight*aff_reward_pos + force_weight*stiffness_aff
+            stiffness_x, stiffness_y, stiffness_z = np.array(info['stiffness_force'])
+
+            stiffness_x_aff = -1 * stiffness_x
+            stiffness_y_aff = -1 * stiffness_y
+            stiffness_z_aff = -1 * stiffness_z
+
+            epsilon = 1e-6
+            stiffness_x_aff = 1 - (stiffness_x + 1) / (2+epsilon)
+            stiffness_y_aff = 1 - (stiffness_y + 1) / (2+epsilon)
+            stiffness_z_aff = 1 - (stiffness_z + 1) / (2+epsilon)
+
+            # scaling_factor = 1.0
+            # stiffness_x_aff = np.exp(-scaling_factor * abs(stiffness_x + 1))
+            # stiffness_y_aff = np.exp(-scaling_factor * abs(stiffness_y + 1))
+            # stiffness_z_aff = np.exp(-scaling_factor * abs(stiffness_z + 1))
+
+            stiffness_aff = stiffness_x_aff + stiffness_y_aff + stiffness_z_aff
+            stiffness_aff_norm = stiffness_aff/3
+            ## stiffness_aff_norm = (stiffness_aff + 3) / 6
+
+#            aff_reward = pos_weight*aff_reward_pos + force_weight * stiffness_aff_norm
+
+#            reciprocal_pos_aff = 1 / aff_reward_pos
+#            reciprocal_stiffness_aff = 1 / stiffness_aff_norm
+
+#            arithmetic_mean_reward = (pos_weight * reciprocal_pos_aff + force_weight * reciprocal_stiffness_aff) / 2
+#            aff_reward = 1 / arithmetic_mean_reward
+
+            # weighted_aff_reward_pos = pos_weight * aff_reward_pos
+            # weighted_stiffness_aff_norm = force_weight * stiffness_aff_norm
+            # aff_reward = 2 / (1 / weighted_aff_reward_pos + 1 / weighted_stiffness_aff_norm)
+
+            geometric_mean_reward = np.sqrt(aff_reward_pos * stiffness_aff_norm)
+            aff_reward = geometric_mean_reward
+
+            # weighted_geometric_mean = (aff_reward_pos**pos_weight * stiffness_aff_norm**force_weight)
+            # aff_reward = weighted_geometric_mean
+
+            # print('aff_reward_pos', aff_reward_pos)
+            # print('stiffness',np.array(info['stiffness_force']))
+            # print('stiffness_aff',stiffness_aff)
+            # print('stiffness_aff_norm',stiffness_aff_norm)
+            # print('aff_reward',aff_reward)
+            # print('########')
 
         return aff_reward, aff_success
 
@@ -265,7 +303,7 @@ class GripperSkill(BaseSkill):
         pos = np.zeros(3)
         is_delta = True
         params = self._params.copy()
-        impedance_pos = [-1,-1,-1] # might cause problems, probably not
+        impedance_pos = [0,0,0] # might cause problems, probably not
         return pos, is_delta, impedance_pos
 
     def get_ori_ac(self, info):
@@ -655,6 +693,8 @@ class GraspSkill(BaseSkill):
                 params[6:9], self._config['global_xyz_bounds'])
             impedance_pos = params[:3].copy()
 
+        # print(self._config['global_xyz_bounds'])
+
         # Discretizes impedance to 3 values: -1, 0, 1
         if self._config['discrete_impedance']:
             impedance_pos = np.round(impedance_pos)
@@ -800,7 +840,7 @@ class PushSkill(BaseSkill):
 
 #        rc_dim = self._config['robot_controller_dim']
 #        if rc_dim==3 or rc_dim==9: # representing OSC_POSITION
-        delta_pos = params[-3:].copy() # INVESTIGATE MAYBE? #if wiping gets worse, then just make this [-4:-1]
+        delta_pos = params[-3:].copy() # INVESTIGATE MAYBE? #if wiping gets worse, then just make this [-4:-1]; just train everything as OSC_POSITION
 #        elif rc_dim==4 or rc_dim==10: # representing OSC_POSITION_YAW
 #            delta_pos = params[-4:-1].copy()
         delta_pos = np.clip(delta_pos, -1, 1)

@@ -158,6 +158,7 @@ class SkillController:
         info = self._env._get_skill_info()
         robot = self._env.robots[0]
         info['cur_ee_pos'] = np.array(robot.sim.data.site_xpos[robot.eef_site_id])
+        info['counter'] = self._env.counter
         return info
 
     def ac_is_delta(self):

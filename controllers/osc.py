@@ -135,6 +135,15 @@ class OperationalSpaceController(Controller):
             joint_indexes,
             actuator_range,
         )
+
+        self.j = -1
+        self.AFORCE_mode = False
+        self.kp_AFORCE = None
+        self.energy_consumed = 0.0
+        self.previous_action = [0, 0, 0]
+
+        #self.total_energy_consumed = 0.0
+
         # Determine whether this is pos ori or just pos
         self.use_ori = control_ori
 
@@ -251,8 +260,21 @@ class OperationalSpaceController(Controller):
         # Update state
         self.update()
 
+        if (
+            self.AFORCE_mode
+            and self.impedance_mode == "variable_kp_mod"
+            and self.kp_AFORCE is not None
+            and np.array_equal(self.previous_action[:3], action[:3]) #compare current and previous action to allow the newly predicted kp to be included
+        ):
+            
+            delta = action[3:]
+            self.kp = self.kp_AFORCE
+            #print('aforce', self.kp_AFORCE)
+            self.kp[:3] = np.clip(self.kp[:3], self.kp_min, self.kp_max)
+            self.kd = 2 * np.sqrt(self.kp)  # critically damped
+
         # Parse action based on the impedance mode, and update kp / kd as necessary
-        if self.impedance_mode == "variable":
+        elif self.impedance_mode == "variable":
             damping_ratio, kp, delta = action[:6], action[6:12], action[12:]
             self.kp = np.clip(kp, self.kp_min, self.kp_max)
             self.kd = 2 * np.sqrt(self.kp) * np.clip(damping_ratio, self.damping_ratio_min, self.damping_ratio_max)
@@ -264,18 +286,22 @@ class OperationalSpaceController(Controller):
             self.kp = np.clip(kp, self.kp_min, self.kp_max)
             self.kd = 2 * np.sqrt(self.kp)  # critically damped
         elif self.impedance_mode == "variable_kp_mod": #amin
+            
             kp = np.zeros(6)
             delta = action[3:]
-
+            
             kp[:3] = action[:3]
             kp[:3] = ((kp[:3] - self.input_min[:3]) / (self.input_max[:3] - self.input_min[:3])) * (self.kp_max[:3] - self.kp_min[:3]) + self.kp_min[:3]
 
-            self.kp[3:6] = [50, 50, 50]
+            self.kp[3:6] = [150, 150, 150]
             self.kp[:3] = np.clip(kp[:3], self.kp_min, self.kp_max)
+
             self.kd = 2 * np.sqrt(self.kp)  # critically damped
         else:   # This is case "fixed"
             delta = action
 
+
+        #print(self.impedance_mode)
         # insert zeros at dummy control dimensions
         for d in self.dummy_control_dims:
             delta = np.insert(delta, d, 0.0)
@@ -322,6 +348,8 @@ class OperationalSpaceController(Controller):
             self.relative_ori = np.zeros(3)  # relative orientation always starts at 0
 
         # self.i = 0
+        self.previous_action = action[:3]
+        #print('------')
 
     def run_controller(self):
         """
@@ -363,31 +391,34 @@ class OperationalSpaceController(Controller):
         position_error = desired_pos - self.ee_pos
         vel_pos_error = -self.ee_pos_vel
 
-        gamma = 9e-3 #9e-4#9e-5 ####9e-3 in first ###15e-3 in second
-        beta = 0.14 #5000*gamma#0.2 #1.4#0.14 #0.14 in first ##0.14 in second
+        if self.AFORCE_mode:
+            gamma = 9e-3#10e-2#2e-3 #9e-4 #9e-4#9e-5 ####9e-3 in first ###15e-3 in second
+            beta = 0.14#0.2 # 0.14 #5000*gamma#0.2 #1.4#0.14 #0.14 in first ##0.14 in second
 
-        # self.i+=1
+            k_dot = beta * np.abs(position_error) - gamma * self.energy_consumed #energy was 5 and 3.5 before
+            self.kp[:3] += k_dot
+            self.kp[:3] = np.clip(self.kp[:3], self.kp_min[:3], self.kp_max[:3])
 
-        # self.kp_pre = self.kp[:3]
+            # print(k_dot)
+            # print(self.kp[:3])
+            # print('#######')
 
-        # k_dot = beta * np.abs(position_error) - gamma * 15
-        # self.kp[:3] += k_dot
+            #self.i+=1
+            #print(self.i)
 
-        # self.kp = np.clip(self.kp, 30, 200)
-        # self.kp_post = self.kp[:3]
+            kp_curr = self.kp
+            self.kp_AFORCE = kp_curr
+            #print('stiffness', self.kp_AFORCE[:3])
 
-        # print(self.i)
-        # print('error', position_error)
-        # print('self.kp PRE', self.kp_pre)
-        # print('K_dot',k_dot)
-        # print('self.kp POST', self.kp_post)
-        # print('############')
+        #print(self.kp)
 
         # F_r = kp * pos_err + kd * vel_err
         desired_force = (np.multiply(np.array(position_error), np.array(self.kp[0:3]))
                          + np.multiply(vel_pos_error, self.kd[0:3]))
         
         vel_ori_error = -self.ee_ori_vel
+
+        #print('force', desired_force)
 
         # Tau_r = kp * ori_err + kd * vel_err
         desired_torque = (np.multiply(np.array(ori_error), np.array(self.kp[3:6]))
@@ -416,6 +447,13 @@ class OperationalSpaceController(Controller):
         #                     to the initial joint positions
         self.torques += nullspace_torques(self.mass_matrix, nullspace_matrix,
                                           self.initial_joint, self.joint_pos, self.joint_vel)
+
+
+        if self.AFORCE_mode:
+            # Calculate power for each joint
+            joint_power = np.abs(np.multiply(self.torques, self.joint_vel))
+            total_power = np.sum(joint_power)
+            self.energy_consumed = total_power * (1.0 / self.control_freq)
 
         # Always run superclass call for any cleanups at the end
         super().run_controller()
